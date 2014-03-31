@@ -33,11 +33,6 @@ Then log in as root and enter:
 
 That's all!
 
-To get the latest version of XParam, see
-http://sourceforge.net/projects/xparam/
-To contact the developers, send e-mail to the mailing list. We welcome patches,
-but it helps to discuss them first.
-
 See the examples directory for example code.
 
 Use pkg-config to discover the necessary include and linker arguments. For
