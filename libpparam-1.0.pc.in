@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libpparam
+Description: Common parameter structures for managing/manipulating XMLs
+URL: 
+Requires: libxml++-2.6 uuid openssl
+Version: @PACKAGE_VERSION@
+Libs: -Wl,--rpath -Wl,${libdir} -L${libdir} -lpparam
+Cflags: -I${includedir}/pvm
