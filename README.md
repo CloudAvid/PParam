@@ -1,42 +1,36 @@
+Nowadays, most applications send and receive their data in XML format. Therefore, we started to write "PParam" to  improve C++ developer productivity and performance to accessing and manipulating  XML files.
+
 # PParam Library
 
-PParam is a library based on libxml++ and contains set of classes that defines
+PParam library is based on libxml++ . Its contains a set of classes that defines
 various structures and contents (data type) of XML.
 
-Nowadays, most applications retrieve, save, send and recieve their data in XML
-format. Therefore, Our developers started to write PParam to provide a library
-that eases manipulating XMLs in C++ programming language. By PParam, developers
-can define a class and then print out the class in XML format or save it into a
-file or load an XML from string or file to that class. You may see PParam 
-as a serialize method, but with some differ.
-In addition, PParam introduces a novel method for designing object-oriented
-programs that is called XObject. XObject defines a real world as a set of
-objects and their connections. This method reduces design complexity and
-increases flexibility and stability of a system.
+Nowadays, most applications send and receive their data in XML format. Therefore, Our developers started to write "PParam" to  improve C++ developer productivity and performance to accessing and manipulating  XML files.By PParam, developers can define a class and then print out the class in XML format or save it into a file. They also can load XML file to load class. You may see PParam as a serialize method, but with some differents.
+In addition, PParam introduces a new method for designing object-oriented programs that is called XObject. XObject defines a real world as a set of objects and their connections. This method reduces design complexity and increases flexibility and stability of a system.
 
-## PParam Target
+## PParam roadmap
 
-The Target of PParam is: <i><b>Developing a general purpose parameter structure in C++ that may be used by programmers without any need of considerations about transfer or storage media of the parameters.</b></i>
+The roadmap of PParam is: <i><b>Developing a general purpose parameter structure in C++ that may be used by programmers without any need of considerations about transfer or storage media of the parameters.</b></i>
 
 # Installation
 
-The first stage is to configure PParam for your system:
+The first step is getting  the lasted source and unzipt it. run this command to configure PParam for your system:
 ```shell
 $ ./configure
 ```
 
 NOTE: if configure does not exist, run ./autogen.sh script.
 
-The next stage is to build the various binary files. Enter:
+The next step is building the various binary files. So, enter:
 ```shell
 $ make
 ```
 
-Then log in as root and enter:
+Then login as root and run:
 ```shell
 $ make install
 ```
-That's all!
+That's all ;-)
 
 See the examples directory for example code.
 
@@ -59,7 +53,7 @@ Also you may try to report any bug/question by "github" issues.
 We welcome any collaboration in PParam development. It may be in different fields:
 * Test and bug reports.
 * Writing documents.
-* Develop new features.
+* Develop  new features.
 * ... 
 
 Some opportunities to develop PParam are:
@@ -73,6 +67,4 @@ Some opportunities to develop PParam are:
 
 The most important product of us is [PVM (PDNSoft Co. Virtual Machine Management System)](http://pdnsoft.com/en/web/pdnen/pvm) which is a hypervisor based on KVM (Kernel Virtual Machine). We have been working on this product form 5 years ago. PDN is expert in building visualization servers and also in developing system softwares like of firewalls.
 
-Our mission is to be the best high technology company through delivering  high-quality custom software
-We believe that the most important factor of our success is the success of our clients and provide them with products that help their business growth. We pay special attention to the quality  of the products/services  we deliver. We believe that the only way to keep our businesses successful is working hard for our customers.
-
+Our mission is to be the best high technology company through delivering  high-quality custom software We believe that the most important factor of our success is the success of our clients and provide them with products that help their business growth. We pay special attention to the quality  of the products/services  we deliver. We believe that the only way to keep our businesses successful is working hard for our customers.
