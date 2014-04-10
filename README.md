@@ -1,5 +1,4 @@
-PParam Library
-==============
+# PParam Library
 
 PParam is a library based on libxml++ and contains set of classes that defines
 various structures and contents (data type) of XML.
@@ -15,37 +14,56 @@ programs that is called XObject. XObject defines a real world as a set of
 objects and their connections. This method reduces design complexity and
 increases flexibility and stability of a system.
 
-INSTALLATION
-============
+## PParam Target
+
+The Target of PParam is: <i><b>Developing a general purpose parameter structure in C++ that may be used by programmers without any need of considerations about transfer or storage media of the parameters.</b></i>
+
+# Installation
 
 The first stage is to configure PParam for your system:
+```shell
+$ ./configure
+```
 
-	./autogen.sh
-	./configure
-
-NOTE: if configure does not exist, run ./autogen script.
+NOTE: if configure does not exist, run ./autogen.sh script.
 
 The next stage is to build the various binary files. Enter:
-
-	make
+```shell
+$ make
+```
 
 Then log in as root and enter:
-
-	make install
-
+```shell
+$ make install
+```
 That's all!
 
 See the examples directory for example code.
 
 Use pkg-config to discover the necessary include and linker arguments. For
 instance,
-  pkg-config libpparam-1.0 --cflags --libs
+```shell
+$ pkg-config libpparam-1.0 --cflags --libs
+```
 
-DISCUSSION
-==========
+# Discussion
 
-Before any work on PParam, read PParam Tutorial from heer: http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam
+Before any work on PParam, read PParam Tutorial from [PParam wiki](http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam).
 
-For any discussion about PParam user it's forum: http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811
+For any discussion about PParam use it's [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811).
 
 Also you may try to report any bug/question by "github" issues.
+
+# Collaborate
+
+We welcome any collaboration in PParam development. It may be in different fields:
+* Test and bug reports.
+* Writing documents.
+* Develop new features.
+* ... 
+
+Some opportunities to develop PParam are:
+* Support Of attributes for XML tags.
+* Support of "json"
+* Support of different databases, PParam now has a limited support of "sqlite", so we want to have a complete DB layer, and support of different DBMS-es. By this feature, programmer could store/retrieve it's parameters in/from DB.
+
