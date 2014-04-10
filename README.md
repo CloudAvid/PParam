@@ -67,3 +67,12 @@ Some opportunities to develop PParam are:
 * Support of "json"
 * Support of different databases, PParam now has a limited support of "sqlite", so we want to have a complete DB layer, and support of different DBMS-es. By this feature, programmer could store/retrieve it's parameters in/from DB.
 
+# About PDNSoft Co.
+
+[PDNSoft](http://www.pdnsoft.com) was established in  January 2005. The company headquarter is in Yazd ,Iran. The main goal of company is software development with open-source technology.
+
+The most important product of us is [PVM (PDNSoft Co. Virtual Machine Management System)](http://pdnsoft.com/en/web/pdnen/pvm) which is a hypervisor based on KVM (Kernel Virtual Machine). We have been working on this product form 5 years ago. PDN is expert in building visualization servers and also in developing system softwares like of firewalls.
+
+Our mission is to be the best high technology company through delivering  high-quality custom software
+We believe that the most important factor of our success is the success of our clients and provide them with products that help their business growth. We pay special attention to the quality  of the products/services  we deliver. We believe that the only way to keep our businesses successful is working hard for our customers.
+
