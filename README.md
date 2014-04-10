@@ -43,6 +43,7 @@ $ pkg-config libpparam-1.0 --cflags --libs
 # Discussion
 
 Before any work on PParam, read PParam Tutorial from [PParam wiki](http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam).
+Also you can access to "doxygen" output of PParam comments from [PParam Doxy](http://support.pdnsoft.com/doxy/PParam).
 
 For any discussion about PParam use it's [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811).
 
