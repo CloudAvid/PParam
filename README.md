@@ -8,7 +8,7 @@ various structures and contents (data type) of XML.
 Nowadays, most applications send and receive their data in XML format. Therefore, Our developers started to write "PParam" to  improve C++ developer productivity and performance to accessing and manipulating  XML files.By PParam, developers can define a class and then print out the class in XML format or save it into a file. They also can load XML file to load class. You may see PParam as a serialize method, but with some differents.
 In addition, PParam introduces a new method for designing object-oriented programs that is called XObject. XObject defines a real world as a set of objects and their connections. This method reduces design complexity and increases flexibility and stability of a system.
 
-## PParam roadmap
+## PParam Roadmap
 
 The roadmap of PParam is: <i><b>Developing a general purpose parameter structure in C++ that may be used by programmers without any need of considerations about transfer or storage media of the parameters.</b></i>
 
@@ -42,30 +42,33 @@ $ pkg-config libpparam-1.0 --cflags --libs
 
 # Discussion
 
-Before any work on PParam, read PParam Tutorial from [PParam wiki](http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam).
+Before any use of PParam, read PParam Tutorial from [PParam wiki](http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam).
 Also you can access to "doxygen" output of PParam comments from [PParam Doxy](http://support.pdnsoft.com/doxy/PParam).
 
-For any discussion about PParam use it's [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811).
+Read of "sparam.hpp|cpp" may be useful. It contains practical scenarios in use of PParam.
 
-Also you may try to report any bug/question by "github" issues.
+For any discussion about PParam use its [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811).
+
+Also you may try to use "github" issues.
 
 # Collaborate
 
 We welcome any collaboration in PParam development. It may be in different fields:
 * Test and bug reports.
 * Writing documents.
-* Develop  new features.
+* Develop new features (see opportunities below).
 * ... 
 
 Some opportunities to develop PParam are:
-* Support Of attributes for XML tags.
-* Support of "json"
-* Support of different databases, PParam now has a limited support of "sqlite", so we want to have a complete DB layer, and support of different DBMS-es. By this feature, programmer could store/retrieve it's parameters in/from DB.
+* Attributes support in XML tags.
+* "json" support.
+* Database support, PParam now has a limited support of "sqlite", so we want to have a complete DB layer, and support of different DBMS-es. By this feature, programmer could store/retrieve it's parameters in/from DB.
+* Develop more special parameters (see "sparam.hpp|cpp").
 
 # About PDNSoft Co.
 
-[PDNSoft](http://www.pdnsoft.com) was established in  January 2005. The company headquarter is in Yazd ,Iran. The main goal of company is software development with open-source technology.
+[PDNSoft Co.](http://www.pdnsoft.com) was established in  January 2005. The company headquarter is in Yazd ,Iran. The main goal of company is software development with open-source technology.
 
-The most important product of us is [PVM (PDNSoft Co. Virtual Machine Management System)](http://pdnsoft.com/en/web/pdnen/pvm) which is a hypervisor based on KVM (Kernel Virtual Machine). We have been working on this product form 5 years ago. PDN is expert in building visualization servers and also in developing system softwares like of firewalls.
+The most important product of us is [PVM (PDNSoft Co. Virtual Machine Management System)](http://pdnsoft.com/en/web/pdnen/pvm) which is a hypervisor based on KVM (Kernel Virtual Machine). We have been working on this product during last 7 years. PDN is expert in server's virtualization and also in developing system softwares like firewalls.
 
 Our mission is to be the best high technology company through delivering  high-quality custom software We believe that the most important factor of our success is the success of our clients and provide them with products that help their business growth. We pay special attention to the quality  of the products/services  we deliver. We believe that the only way to keep our businesses successful is working hard for our customers.
