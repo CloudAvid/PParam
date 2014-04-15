@@ -5,11 +5,8 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * \author hamid jafarian (hamid.jafarian\pdnsoft.com)
- */
-
-/*
  * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
+ * \author hamid jafarian (hamid.jafarian\pdnsoft.com)
  *
  * xparam is part of PParam.
  *

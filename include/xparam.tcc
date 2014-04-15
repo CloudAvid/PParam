@@ -1,3 +1,29 @@
+/**
+ * \file xparam.tpp
+ * defines common parameter structures for managing/manipulating them.
+ *
+ * Our focus is on parameters of virtual machines to read, write, process,...
+ * them from config repository.
+ *
+ * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
+ * \author hamid jafarian (hamid.jafarian\pdnsoft.com)
+ *
+ * xparam is part of PParam.
+ *
+ * PParam is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * PParam is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <stdexcept>
 
 namespace pparam

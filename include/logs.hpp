@@ -1,7 +1,7 @@
 /**
  * @file logs.hpp
  * LogSystem(logs), a simple wrapper to work with rsyslog.
- * Copyritgh 2010 PDNSoft Co. (www.pdnsoft.com)
+ * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
  * @author hamid jafaian (hamid.jafarian@pdnsoft.com)
  *
  * logs is part of PParam.

@@ -1,7 +1,7 @@
 /**
  * @file exception.hpp
  *
- * Copyritgh 2010 PDNSoft Co. (www.pdnsoft.com)
+ * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
  * @author hamid jafaian (hamid.jafarian@pdnsoft.com)
  *
  * exception is part of PParam.
