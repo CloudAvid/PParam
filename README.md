@@ -29,7 +29,6 @@ if you are looking for a more in-depth view of how PParam works, we recommend yo
 If you have questions regarding the use of PParam  feel free to register and ask your question on [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811). 
 # PParam Roadmap
 The roadmap of PParam is: 
-* Developing a general purpose parameter structure in C++ that can be used by programmers without any worries about  transferring or different storage media type.
 * Attributes support in XML tags.
 * "json" support. 
 * Database support, PParam now has a limited support of "sqlite", so we want to have a complete DB layer, and support of different DBMS-es. By this feature, programmer could store/retrieve it's parameters in/from DB. 
