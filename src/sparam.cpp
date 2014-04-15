@@ -347,10 +347,10 @@ unsigned char DateParam::daysOfMonth() const
 
 bool DateParam::isLeapYear() const
 {
-	if (year % 4)
-		return false;
+	if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0))
+		return true;
 
-	return true;
+	return false;
 }
 
 unsigned short DateParam::daysOfYear() const
