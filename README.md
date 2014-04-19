@@ -40,7 +40,7 @@ The roadmap of PParam is:
 If you are capable of contributing code changes, we encourage you to do so. You can help us in different fields:
 * Testing and bug reports
 * Improving Documentation
-* Develop new features (see opportunities below)
+* Develop new features (see roadmap above)
 * ... 
 
 # Bugs
