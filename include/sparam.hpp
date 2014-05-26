@@ -50,14 +50,18 @@ public:
 	UUIDParam &operator = (const UUIDParam &);
 	XParam &operator = (const string &) throw (Exception);
 	XParam &operator = (const XParam &) throw (Exception);
-	string value() const;
-	void set_value(const string &_uuid)
-	{
-		*this = _uuid;
-	}
 	void regenerate()
 	{
 		uuid_generate(uuid);
+	}
+	string value() const;
+	virtual void rset()
+	{
+		regenerate();
+	}
+	void set_value(const string &_uuid)
+	{
+		*this = _uuid;
 	}
 private:
 	uuid_t uuid;
@@ -134,6 +138,10 @@ public:
 
 	BoolParam(const string &pname) : XEnumParam<Bool>(pname, Bool::YES)
 	{
+	}
+	virtual void reset()
+	{
+		enable(Bool::YES);
 	}
 	bool is_enable() const
 	{
@@ -256,6 +264,10 @@ public:
 	void set_date(unsigned short,unsigned short,unsigned short);
 	bool isValid();
 	string value() const;
+	virtual void reset()
+	{
+		year = month = day = 0;
+	}
 	string formattedValue(const string format) const;
 	void now();
 	unsigned char daysOfMonth() const;
@@ -330,6 +342,10 @@ public:
 	void set_time(unsigned short,unsigned short,unsigned int);
 	bool isValid();
 	string value() const;
+	virtual void reset()
+	{
+		hour = minute = second = 0;
+	}
 	string formattedValue(const string format) const;
 	void now();
 
@@ -431,6 +447,11 @@ public:
 	bool operator > (DateTime &dateTime);
 	bool isValid();
 	virtual string value() const;
+	virtual void reset()
+	{
+		date.reset();
+		time.reset();
+	}
 	string formattedValue(const string dateFormat,const string timeFormat,
 				const char separator = 'T') const;
 	/**
@@ -528,6 +549,9 @@ public:
 	{ return *this; }
 	virtual string value() const
 	{ return ""; }
+	virtual void reset()
+	{
+	}
 	/**
 	 * get parts of IP
 	 * \param partid [in] part id to retrive
@@ -867,6 +891,12 @@ public:
 	 * \return returns IP address and Netmask in a string.
 	 */
 	string value() const;
+	virtual void reset()
+	{
+		address[0] = address[1] = address[2] = address[3] = 0;
+		netmask = 32;
+		containNetmask = false;
+	}
 	/**
 	 * check if the given IP is accessible through this IP
 	 * \param IPAddress [in] the IP that will check accessibility for.
@@ -1042,6 +1072,13 @@ public:
 	 * \return returns IP address and Netmask in a string.
 	 */
 	string value() const;
+	virtual void reset()
+	{
+		address[0] = address[1] = address[2] = address[3] = address[4] =
+			address[5] = 0;
+		netmask = 128;
+		containNetmask = false;
+	}
 	/**
 	 * check if the given IP is accessible through this IP
 	 * \param IPAddress [in] the IP that will check accessibility for.
@@ -1079,6 +1116,7 @@ public:
 	virtual XParam &operator = (const string &ip);
 	virtual XParam &operator = (const XParam &parameter);
 	virtual string value() const;
+	virtual void reset();
 	/**
 	 * get only IP Address part of this address
 	 * \return return IP address in a string
@@ -1451,6 +1489,14 @@ public:
 	string value() const
 	{
 		return portString;
+	}
+	virtual void reset()
+	{
+		portRange = false;
+		notSign = false;
+		from = INVALID_PORT;
+		from = to = INVALID_PORT;
+		portString = "";
 	}
 
 private:

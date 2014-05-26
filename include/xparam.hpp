@@ -190,6 +190,10 @@ public:
 	 */
 	virtual string get_key() const { return ""; }
 	/**
+	 * Reset parameter value to default value
+	 */
+	virtual void reset() = 0;
+	/**
 	 * Print out parameter value in xml format.
 	 * \param show_runtime whould we see runtime parameters in xml string.
 	 * \param indent size of indention.
@@ -342,6 +346,7 @@ public:
 	virtual string _xml(bool show_runtime,
 				const int &indent, const string &endl) const;
 	virtual string value() const { return ""; }
+	virtual void reset();
 	virtual XParam *value(int index) const;
 	virtual XParam *value(string name) const;
 	virtual bool verify() throw (Exception);
@@ -455,6 +460,7 @@ public:
 	virtual XParam &operator = (const XParam &xp)
 						throw (Exception);
 	string value() const { return val; }
+	virtual void reset() { val = ""; }
 	void set_value(const string &str) 
 	{ 
 		val = str;
@@ -531,6 +537,7 @@ public:
 
 		return oss.str();
 	}
+	virtual void reset() { val = min; }
 	void set_value(const T &value) throw (Exception) 
 	{ 
 		if ((max >= min) /* we should check boundries. */
@@ -589,6 +596,7 @@ public:
 	virtual XParam &operator = (const XFloat &) throw (Exception);
 	virtual XParam &operator = (const XParam &xp) throw (Exception);
 	string value() const;
+	virtual void reset() { val = min; }
 	XFloat float_value() const { return val; }
 	void set_value(const XFloat &value) throw (Exception)
 		{ (*this) = value; }
@@ -660,6 +668,7 @@ public:
 		if (val < 0 || val >= T::MAX) return "";
 		return T::typeString[val];
 	}
+	virtual void reset() { val = def; }
 	virtual void set_value(const int &value) throw (Exception)
 	{ 
 		if (value >= 0 && value <= T::MAX) val = value;
@@ -779,6 +788,7 @@ public:
 		}
 		params.clear();
 	}
+	virtual void reset() { clear(); }
 	/**
 	 * Enable search map and ready him to work with.
 	 *
@@ -905,11 +915,11 @@ public:
 	virtual void dbQuery(XDBCondition &conditions);
 	virtual string generateJoinStmts(const XParam *parentNode =
 							(XParam *)NULL);
-
 	virtual ~XSetParam()
 	{
 		clear();
 	}
+
 protected:
 	/**
 	 * Add defined parameter to search map.
@@ -1000,8 +1010,6 @@ protected:
 	{
 		return newT((const XmlNode *)NULL);
 	}
-
-
 };
 
 /**
@@ -1116,6 +1124,7 @@ public:
 			xdel(iter);
 		}
 	}
+	virtual void reset() { clear(); }
 	/**
 	 * Find parameter base on id.
 	 *

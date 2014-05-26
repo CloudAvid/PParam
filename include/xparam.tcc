@@ -147,6 +147,13 @@ bool _XMixParam<List>::operator != (const XParam &parameter) throw (Exception)
 }
 
 template<typename List>
+void _XMixParam<List>::reset()
+{
+	for (const_iterator iter = params.begin(); iter != params.end(); ++iter)
+		(*iter)->reset();
+}
+
+template<typename List>
 string _XMixParam<List>::_xml(bool show_runtime, 
 			const int& indent, const string& endl) const
 {

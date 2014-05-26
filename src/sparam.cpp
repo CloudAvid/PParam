@@ -1564,6 +1564,14 @@ string IPxParam::value() const
 	return "";
 }
 
+void IPxParam::reset()
+{
+	if ((version == IPType::IPv4) && (ipv4))
+		return ipv4->reset();
+	if ((version == IPType::IPv6) && (ipv6))
+		return ipv6->reset();
+}
+
 string IPxParam::getAddress() const
 {
 	if (version == IPType::IPv4)
