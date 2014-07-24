@@ -43,22 +43,22 @@ namespace pparam
 class UUIDParam : public XSingleParam
 {
 public:
-	UUIDParam(const string &name) : XSingleParam(name)
-	{
-		uuid_generate(uuid);
-	}
-	UUIDParam &operator = (const UUIDParam &);
-	XParam &operator = (const string &) throw (Exception);
-	XParam &operator = (const XParam &) throw (Exception);
 	void regenerate()
 	{
 		uuid_generate(uuid);
 	}
-	string value() const;
-	virtual void rset()
+	virtual void reset()
 	{
 		regenerate();
 	}
+	UUIDParam(const string &name) : XSingleParam(name)
+	{
+		reset();
+	}
+	UUIDParam &operator = (const UUIDParam &);
+	XParam &operator = (const string &) throw (Exception);
+	XParam &operator = (const XParam &) throw (Exception);
+	string value() const;
 	void set_value(const string &_uuid)
 	{
 		*this = _uuid;
@@ -138,10 +138,6 @@ public:
 
 	BoolParam(const string &pname) : XEnumParam<Bool>(pname, Bool::YES)
 	{
-	}
-	virtual void reset()
-	{
-		enable(Bool::YES);
 	}
 	bool is_enable() const
 	{
@@ -712,6 +708,12 @@ protected:
 class IPv4Param: public IPParam
 {
 public:
+	virtual void reset()
+	{
+		address[0] = address[1] = address[2] = address[3] = 0;
+		netmask = 32;
+		containNetmask = false;
+	}
 	/**
 	 * Constructor of IPv4Param class.
 	 * by default :
@@ -724,9 +726,7 @@ public:
 	{
 		ipType.set_type(get_pname(), IPType::IPv4);
 
-		address[0] = address[1] = address[2] = address[3] = 0;
-		netmask = 32;
-		containNetmask = false;
+		reset();
 	}
 	virtual void type(Type &_type) const
 	{
@@ -891,12 +891,6 @@ public:
 	 * \return returns IP address and Netmask in a string.
 	 */
 	string value() const;
-	virtual void reset()
-	{
-		address[0] = address[1] = address[2] = address[3] = 0;
-		netmask = 32;
-		containNetmask = false;
-	}
 	/**
 	 * check if the given IP is accessible through this IP
 	 * \param IPAddress [in] the IP that will check accessibility for.
@@ -924,6 +918,13 @@ private:
 class IPv6Param: public IPParam
 {
 public:
+	virtual void reset()
+	{
+		address[0] = address[1] = address[2] = address[3] = address[4] =
+			address[5] = address[6] = address[7] = 0;
+		netmask = 128;
+		containNetmask = false;
+	}
 	/**
 	 * Constructor of IPv6Param class.
 	 * by default :
@@ -936,10 +937,7 @@ public:
 	{
 		ipType.set_type(get_pname(), IPType::IPv6);
 
-		address[0] = address[1] = address[2] = address[3] = address[4] =
-			address[5] = 0;
-		netmask = 128;
-		containNetmask = false;
+		reset();
 	}
 	virtual void type(Type &_type) const
 	{
@@ -1072,13 +1070,6 @@ public:
 	 * \return returns IP address and Netmask in a string.
 	 */
 	string value() const;
-	virtual void reset()
-	{
-		address[0] = address[1] = address[2] = address[3] = address[4] =
-			address[5] = 0;
-		netmask = 128;
-		containNetmask = false;
-	}
 	/**
 	 * check if the given IP is accessible through this IP
 	 * \param IPAddress [in] the IP that will check accessibility for.
@@ -1116,7 +1107,13 @@ public:
 	virtual XParam &operator = (const string &ip);
 	virtual XParam &operator = (const XParam &parameter);
 	virtual string value() const;
-	virtual void reset();
+	virtual void reset()
+	{
+		if ((version == IPType::IPv4) && (ipv4))
+			ipv4->reset();
+		if ((version == IPType::IPv6) && (ipv6))
+			ipv6->reset();
+	}
 	/**
 	 * get only IP Address part of this address
 	 * \return return IP address in a string
@@ -1445,13 +1442,17 @@ private:
 class PortParam : public XSingleParam
 {
 public:
-	PortParam(const string &name = "port") : XSingleParam(name)
+	virtual void reset()
 	{
 		portRange = false;
 		notSign = false;
 		from = INVALID_PORT;
 		from = to = INVALID_PORT;
 		portString = "";
+	}
+	PortParam(const string &name = "port") : XSingleParam(name)
+	{
+		reset();
 	}
 	PortParam(const PortParam &port) : XSingleParam(port.get_pname())
 	{
@@ -1489,14 +1490,6 @@ public:
 	string value() const
 	{
 		return portString;
-	}
-	virtual void reset()
-	{
-		portRange = false;
-		notSign = false;
-		from = INVALID_PORT;
-		from = to = INVALID_PORT;
-		portString = "";
 	}
 
 private:

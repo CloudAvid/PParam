@@ -816,7 +816,8 @@ IPParam* IPParam::getIP(string name, string iIP)
 			*ip6 = iIP;
 			return ip6;
 		} catch (Exception &e) {
-			throw Exception("IP address is not valid",
+		//	throw Exception("IP address is not valid",
+			throw Exception("IP '" + iIP + "' is not valid",
 				TracePoint("sparam"));
 		}
 	}
@@ -1564,13 +1565,15 @@ string IPxParam::value() const
 	return "";
 }
 
+#if 0
 void IPxParam::reset()
 {
 	if ((version == IPType::IPv4) && (ipv4))
-		return ipv4->reset();
+		ipv4->reset();
 	if ((version == IPType::IPv6) && (ipv6))
-		return ipv6->reset();
+		ipv6->reset();
 }
+#endif
 
 string IPxParam::getAddress() const
 {

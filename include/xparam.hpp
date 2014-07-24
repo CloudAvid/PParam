@@ -848,31 +848,55 @@ public:
 		return NULL;
 	}
 	/**
-	 * Delete parameter with specified key.
+	 * Delete parameter(storage structure + memory) with specified.
 	 *
 	 * You should call this function when smap has been enabled.
 	 */
 	virtual void del(const Key &_key)
 	{
-		smiterator siter = smap.find(_key);
-		if (siter == smap.end()) return;
-		iterator iter = std::find(begin(), end(), siter->second);
-		delete siter->second;
-		params.erase(iter);
-		smap.erase(siter);
+		XParam *param = del_soft(_key);
+		if (param) delete param;
 	}
 	/**
-	 * Delete parameter at specified location.
+	 * Soft delete parameter(just storage structure) with specified key.
+	 *
+	 * This function will delete storage structures without erase of
+	 * actual parameter memory.
+	 * You should call this function when smap has been enabled.
+	 */
+	virtual XParam* del_soft(const Key &_key)
+	{
+		smiterator siter = smap.find(_key);
+		if (siter == smap.end()) return NULL;
+		iterator iter = std::find(begin(), end(), siter->second);
+		XParam *ret = siter->second;
+		params.erase(iter);
+		smap.erase(siter);
+		return ret;
+	}
+	/**
+	 * Delete parameter(storage structure + memory) at specified location.
 	 */
 	virtual void del(iterator iter)
+	{
+		delete del_soft(iter);
+	}
+	/**
+	 * Soft delete parameter(just storage structure) at specified location.
+	 *
+	 * This function will delete storage structures without erase of
+	 * actual parameter memory.
+	 */
+	virtual XParam* del_soft(iterator iter)
 	{
 		if (smapEnabled) {
 			Key _key;
 			static_cast<T *>(*iter)->key(_key);
 			smap.erase(smap.find(_key));
 		}
-		delete *iter;
+		XParam *ret = *iter;
 		params.erase(iter);
+		return ret;
 	}
 
 	// Database functions
@@ -1207,6 +1231,22 @@ public:
 		}
 	}
 	/**
+	 * Soft delete prepared element(only storage structure), should be 
+	 * called after "xdel_prepare" call.
+	 * \return Pointer to parameter if iter be on any element, else NULL.
+	 *
+	 * This function could be called on the fly. It will not erase 
+	 * parameter memory, just storage structure.
+	 */
+	XParam* xdel_soft(iterator &iter)
+	{
+		if (iter != end()) {
+			XParam *xparam = *iter;
+			params.xerase(iter);
+			return xparam;
+		} return NULL;
+	}
+	/**
 	 * Delete parameter with specified key.
 	 *
 	 * You should call this function when smap has been enabled.
@@ -1217,11 +1257,31 @@ public:
 		xdel(iter);
 	}
 	/**
+	 * Soft delete parameter(only storage structure) with specified key.
+	 * \return Pointer to paramter if found, else NULL.
+	 *
+	 * You should call this function when smap has been enabled.
+	 */
+	virtual XParam* del_soft(const Key &_key)
+	{
+		iterator iter = xdel_prepare(_key);
+		return xdel_soft(iter);
+	}
+	/**
 	 * Delete parameter at specified location.
 	 */
 	virtual void del(iterator &iter)
 	{
 		if (xdel_prepare(iter)) xdel(iter);
+	}
+	/**
+	 * Soft delete parameter(only storage structure) at specified location.
+	 * \return Pointer to paramter if could prepare, else NULL.
+	 */
+	virtual XParam* del_soft(iterator &iter)
+	{
+		if (xdel_prepare(iter)) return xdel_soft(iter);
+		else return NULL;
 	}
 
 protected:

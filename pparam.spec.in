@@ -1,0 +1,63 @@
+Name:          @PACKAGE_RPMNAME@
+Version:       @PACKAGE_RPMVERSION@
+Release:        @RELEASE_VERSION@%{?dist}
+Summary:       pparam library from PDNSoft 
+
+Group:	pvm-core
+License:  Pre
+URL:      http://www.pdnsoft.com/
+Source0:   @PACKAGE_RPMNAME@-@PACKAGE_RPMVERSION@.tgz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+#BuildRequires:  
+#Requires:
+       
+%description
+pparam tools
+%package        devel
+Summary:        Headers and libraries for pparam
+Group:          Development/Libraries
+Requires:       %{name} = %{version}-%{release}
+%description	devel
+pparam devel
+%prep
+%setup -q
+
+
+%build
+%configure --prefix=@prefix@ 
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+@libdir@/libpparam.la
+@libdir@/libpparam.so
+@libdir@/libpparam.so.@MAJOR_VERSION@
+@libdir@/libpparam.so.@VERSION@
+
+%files devel
+%defattr(-,root,root,-)
+@libdir@/pkgconfig/@PACKAGE@.pc
+@includedir@/pvm/pparam/exception.hpp
+@includedir@/pvm/pparam/logs.hpp
+@includedir@/pvm/pparam/sparam.hpp
+@includedir@/pvm/pparam/sqlite3.h
+@includedir@/pvm/pparam/xdbengine.hpp
+@includedir@/pvm/pparam/xlist.hpp
+@includedir@/pvm/pparam/xobject.hpp
+@includedir@/pvm/pparam/xparam.hpp
+@includedir@/pvm/pparam/xparam.tcc
+
+%postun -p /sbin/ldconfig
+
+%changelog

@@ -80,7 +80,7 @@ XParam& _XMixParam<List>::operator =(const XmlNode* node) throw (Exception)
 			/* in mixture parameters, we should have only one
 			 * instance for each parameter*/
 			throw Exception(
-				"There is mutiple " + child->get_pname()
+				"There is multiple " + child->get_pname()
 					+ " node !", TracePoint("pparam"));
 	}
 	return (*this);

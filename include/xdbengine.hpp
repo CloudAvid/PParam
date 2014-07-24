@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <pthread.h>
-#include <sqlite3.h>
+#include "sqlite3.h"
 
 #include "exception.hpp"
 

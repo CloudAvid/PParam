@@ -3,10 +3,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libpparam
+Name: @PACKAGE_NAME@
 Description: Common parameter structures for managing/manipulating XMLs
-URL: 
+URL: http://www.pdnsoft.com
 Requires: libxml++-2.6 uuid openssl
 Version: @PACKAGE_VERSION@
-Libs: -Wl,--rpath -Wl,${libdir} -L${libdir} -lpparam
+Libs: -lpparam
 Cflags: -I${includedir}/pvm

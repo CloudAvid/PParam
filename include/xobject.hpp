@@ -907,7 +907,51 @@ public:
 			ret += ((_XObject *)(* iter->oside))->xml(true);
 		return ret;
 	}
-
+	/**
+	 * Find connection with "cid" as connection id.
+	 * \param cid connection id of target connection.
+	 */
+	c_iterator queryConnection(const string &cid)
+	{
+		for (c_iterator iter = cList.begin(); 
+					iter != cList.end(); ++iter)
+			if (iter->cid.value() == cid) return iter;
+		return cList.end();
+	}
+	/**
+	 * Find first connection that match "s".
+	 */
+	c_iterator queryConnection(_XObjectScanner &s)
+	{
+		for (c_iterator iter = cList.begin(); 
+					iter != cList.end(); ++iter)
+			if (s.match(*iter)) return iter;
+		return cList.end();
+	}
+	/**
+	 * Find first connection to "objID" that match "s".
+	 * \param objID ID of other side of connection.
+	 */
+	c_iterator queryConnection(_XObjectScanner &s, const string &objID)
+	{
+		for (c_iterator iter = cList.begin(); 
+					iter != cList.end(); ++iter)
+			if (s.match(*iter) && 
+				((*(iter->oside))->get_key() == objID))
+					return iter;
+		return cList.end();
+	}
+	/**
+	 * Find first connection that match "s".
+	 * \param citer location that query would start from.
+	 */
+	c_iterator queryConnection(_XObjectScanner &s, c_iterator citer)
+	{
+		for (c_iterator iter = citer; 
+					iter != cList.end(); ++iter)
+			if (s.match(*iter)) return iter;
+		return cList.end();
+	}
 
 protected:
 	/**
@@ -1157,51 +1201,6 @@ protected:
 	 */
 	virtual void disconnectNotice(const _XObjectConnection &c)
 	{ }
-	/**
-	 * Find connection with "cid" as connection id.
-	 * \param cid connection id of target connection.
-	 */
-	c_iterator queryConnection(const string &cid)
-	{
-		for (c_iterator iter = cList.begin(); 
-					iter != cList.end(); ++iter)
-			if (iter->cid.value() == cid) return iter;
-		return cList.end();
-	}
-	/**
-	 * Find first connection that match "s".
-	 */
-	c_iterator queryConnection(_XObjectScanner &s)
-	{
-		for (c_iterator iter = cList.begin(); 
-					iter != cList.end(); ++iter)
-			if (s.match(*iter)) return iter;
-		return cList.end();
-	}
-	/**
-	 * Find first connection to "objID" that match "s".
-	 * \param objID ID of other side of connection.
-	 */
-	c_iterator queryConnection(_XObjectScanner &s, const string &objID)
-	{
-		for (c_iterator iter = cList.begin(); 
-					iter != cList.end(); ++iter)
-			if (s.match(*iter) && 
-				((*(iter->oside))->get_key() == objID))
-					return iter;
-		return cList.end();
-	}
-	/**
-	 * Find first connection that match "s".
-	 * \param citer location that query would start from.
-	 */
-	c_iterator queryConnection(_XObjectScanner &s, c_iterator citer)
-	{
-		for (c_iterator iter = citer; 
-					iter != cList.end(); ++iter)
-			if (s.match(*iter)) return iter;
-		return cList.end();
-	}
 	/**
 	 * Notify dependent objects from changes in this object.
 	 * 

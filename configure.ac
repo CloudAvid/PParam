@@ -1,8 +1,15 @@
-#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+m4_define([package_name], [pparam])
+m4_define([major_version], [1])
+m4_define([minor_version], [1])
+m4_define([micro_version], [0])
+m4_define([release_version], [1])
+m4_define([package_version],
+	[major_version.minor_version.micro_version])
+
 AC_PREREQ([2.63])
-AC_INIT(pparam, 1.0.0, pparam@pdnsoft.com)
+AC_INIT([package_name], [package_version], [package_name@pdnsoft.com])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/, examples/)
 AC_CONFIG_HEADERS([config.h])
@@ -35,9 +42,35 @@ AC_TYPE_UINT32_T
 AC_FUNC_FORK
 AC_CHECK_FUNCS([dup2 memset pow socket strerror strtol strtoul sysinfo])
 
-AC_SUBST([LIBPPARAM_SO_VERSION], [1:0:0])
+PACKAGE_RPMNAME="pvm-package_name"
+PACKAGE_RPMVERSION="major_version.minor_version.micro_version"
+PACKAGE_TARNAME="pvm-package_name-major_version.minor_version.micro_version"
+MAJOR_VERSION="major_version"
+MINOR_VERSION="minor_version"
+MICRO_VERSION="micro_version"
+RELEASE_VERSION="release_version"
+LIBPPARAM_SO_VERSION="$((major_version + minor_version)):micro_version:minor_version"
 
-libdir=/usr/lib64
-includedir=/usr/local/include
+AC_SUBST([PACKAGE_RPMNAME])
+AC_SUBST([PACKAGE_RPMVERSION])
+AC_SUBST([PACKAGE_TARNAME])
+AC_SUBST([MAJOR_VERSION])
+AC_SUBST([MINOR_VERSION])
+AC_SUBST([MICRO_VERSION])
+AC_SUBST([RELEASE_VERSION])
+AC_SUBST([LIBPPARAM_SO_VERSION])
 
-AC_OUTPUT(Makefile src/Makefile examples/Makefile libpparam-1.0.pc)
+test "x$prefix" = xNONE && prefix=/usr
+libdir=${prefix}/lib64
+localstatedir=/var
+bindir=${prefix}/sbin
+sysconfdir=/etc
+includedir=${prefix}/include
+
+AC_OUTPUT(Makefile
+	src/Makefile
+	examples/Makefile
+	package_name.pc
+	package_name.spec
+	package_name.info
+	)
