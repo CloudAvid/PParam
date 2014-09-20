@@ -78,7 +78,7 @@ void XParam::loadXmlDoc(string xdoc, XmlParser *parser) throw (Exception)
 }
 
 void XParam::saveXmlDoc(string xdoc, bool show_runtime, const int &indent,
-	bool with_endl) throw (Exception)
+	bool with_endl) const throw (Exception)
 {
 	string sxml;
 	try {

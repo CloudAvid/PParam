@@ -87,6 +87,81 @@ const string Bool::typeString[MAX] = {
 		"unset"
 };
 
+BoolParam::BoolParam(const string &pname,const unsigned short _default) :
+	XEnumParam<Bool>(pname, _default)
+{
+}
+
+bool BoolParam::is_enable() const
+{
+	return ! is_disable();
+}
+
+bool BoolParam::is_disable() const
+{
+	return get_value() % 2;
+}
+
+void BoolParam::yes()
+{
+	enable(Bool::YES);
+}
+
+void BoolParam::no()
+{
+	disable(Bool::NO);
+}
+
+void BoolParam::on()
+{
+	enable(Bool::ON);
+}
+
+void BoolParam::off()
+{
+	disable(Bool::OFF);
+}
+
+void BoolParam::enable(int val)
+{
+	set_value((val + (val % 2)) % Bool::MAX);
+}
+
+void BoolParam::disable(int val)
+{
+	set_value((val + !(val % 2)) % Bool::MAX);
+}
+
+void BoolParam::enabled()
+{
+	enable(Bool::ENABLED);
+}
+
+void BoolParam::disabled()
+{
+	disable(Bool::DISABLED);
+}
+
+void BoolParam::up()
+{
+	enable(Bool::UP);
+}
+
+void BoolParam::down()
+{
+	disable(Bool::DOWN);
+}
+
+void BoolParam::set()
+{
+	enable(Bool::SET);
+}
+
+void BoolParam::unset()
+{
+	disable(Bool::UNSET);
+}
+
 BoolParam &BoolParam::operator=(const bool &value)
 {
 	if (value)

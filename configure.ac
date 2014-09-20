@@ -24,7 +24,7 @@ CXXFLAGS="-O0 -g -std=c++0x -Wall"
 CFLAGS="-O0 -g"
 AC_LANG([C++])
 
-PKG_CHECK_MODULES([UUID], [uuid])
+PKG_CHECK_MODULES(UUID, uuid)
 PKG_CHECK_MODULES([LIBXMLXX], [libxml++-2.6])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
 PKG_CHECK_MODULES([GLIBMM], [glibmm-2.4])
@@ -61,7 +61,11 @@ AC_SUBST([RELEASE_VERSION])
 AC_SUBST([LIBPPARAM_SO_VERSION])
 
 test "x$prefix" = xNONE && prefix=/usr
-libdir=${prefix}/lib64
+if test -e /usr/lib64; then
+	libdir=${prefix}/lib64
+else
+	libdir=${prefix}/lib
+fi
 localstatedir=/var
 bindir=${prefix}/sbin
 sysconfdir=/etc

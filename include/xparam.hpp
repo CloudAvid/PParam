@@ -173,7 +173,7 @@ public:
 	 */
 	void saveXmlDoc(string xdoc,
 			bool show_runtime = false, const int &indent = 0,
-			bool with_endl = false) throw (Exception);
+			bool with_endl = false) const throw (Exception);
 	/**
 	 * return parameter value.
 	 */

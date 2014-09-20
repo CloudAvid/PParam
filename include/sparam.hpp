@@ -136,65 +136,21 @@ class BoolParam : public XEnumParam<Bool>
 public:
 	typedef XEnumParam<Bool>	_XEnumParam;
 
-	BoolParam(const string &pname) : XEnumParam<Bool>(pname, Bool::YES)
-	{
-	}
-	bool is_enable() const
-	{
-		return ! is_disable();
-	}
-	bool is_disable() const
-	{
-		return get_value() % 2;
-	}
-	void yes()
-	{
-		enable(Bool::YES);
-	}
-	void no()
-	{
-		disable(Bool::NO);
-	}
-	void on()
-	{
-		enable(Bool::ON);
-	}
-	void off()
-	{
-		disable(Bool::OFF);
-	}
-	void enable(int val = Bool::ENABLE)
-	{
-		set_value((val + (val % 2)) % Bool::MAX);
-	}
-	void disable(int val = Bool::DISABLE)
-	{
-		set_value((val + !(val % 2)) % Bool::MAX);
-	}
-	void enabled()
-	{
-		enable(Bool::ENABLED);
-	}
-	void disabled()
-	{
-		disable(Bool::DISABLED);
-	}
-	void up()
-	{
-		enable(Bool::UP);
-	}
-	void down()
-	{
-		disable(Bool::DOWN);
-	}
-	void set()
-	{
-		enable(Bool::SET);
-	}
-	void unset()
-	{
-		disable(Bool::UNSET);
-	}
+	BoolParam(const string &pname,const unsigned short _default =Bool::YES);
+	bool is_enable() const;
+	bool is_disable() const;
+	void yes();
+	void no();
+	void on();
+	void off();
+	void enable(int val = Bool::ENABLE);
+	void disable(int val = Bool::DISABLE);
+	void enabled();
+	void disabled();
+	void up();
+	void down();
+	void set();
+	void unset();
 	virtual BoolParam &operator=(const bool &value);
 	virtual BoolParam &operator=(const XInt &value) throw (Exception);
 	virtual bool operator==(const bool &value);
