@@ -51,7 +51,6 @@ rm -rf $RPM_BUILD_ROOT
 @includedir@/pvm/pparam/exception.hpp
 @includedir@/pvm/pparam/logs.hpp
 @includedir@/pvm/pparam/sparam.hpp
-@includedir@/pvm/pparam/sqlite3.h
 @includedir@/pvm/pparam/xdbengine.hpp
 @includedir@/pvm/pparam/xlist.hpp
 @includedir@/pvm/pparam/xobject.hpp

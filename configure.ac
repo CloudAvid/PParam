@@ -28,6 +28,7 @@ PKG_CHECK_MODULES(UUID, uuid)
 PKG_CHECK_MODULES([LIBXMLXX], [libxml++-2.6])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
 PKG_CHECK_MODULES([GLIBMM], [glibmm-2.4])
+PKG_CHECK_MODULES(SQLITE3, sqlite3)
 
 AC_CHECK_LIB([uuid], [uuid_parse])
 
