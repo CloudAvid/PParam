@@ -51,6 +51,8 @@ public:
 	{
 		enable_smap();
 	}
+	Servers(Servers &&servers) : XSetParam<Server,string>(std::move(servers))
+	{ }
 };
 
 int main()
@@ -76,6 +78,12 @@ int main()
 	}
 
 	cout << servers.xml(false, 8, true);
+
+	Servers servers2(std::move(servers));
+	cout << servers.xml(false, 8, true);
+	cout << servers.size() << endl;
+	cout << servers2.xml(false, 8, true);
+	cout << servers2.size() << endl;
 
 	return 0;
 }

@@ -94,6 +94,7 @@ public:
 	typedef pparam::XFloat XFloat;
 
 	XParam();
+	XParam(XParam &&);
 	XParam(const string &_pname);
 	/**
 	 * Read parameter value from correspnonding XML node.
@@ -301,6 +302,7 @@ class XSingleParam : public XParam
 {
 public:
 	XSingleParam(const string &_pname);
+	XSingleParam(XSingleParam &&);
 
 	/** Read parameter value from xml config file.
 	 * \param node pointer to parameter node in XML document.
@@ -334,6 +336,7 @@ public:
 	typedef typename list::reverse_iterator 	riterator;
 	typedef typename list::const_reverse_iterator 	const_riterator;
 
+	_XMixParam(_XMixParam &&);
 	_XMixParam(const string &_pname);
 
 	virtual XParam &operator = (const XParam::XmlNode *node)
@@ -441,6 +444,9 @@ class XTextParam : public XSingleParam
 {
 public:
 	XTextParam(const string &_pname) : XSingleParam(_pname), val("") {}
+	XTextParam(XTextParam &&_xtp) : XSingleParam(std::move(_xtp)),
+					val(std::move(_xtp.val))
+	{ }
 	XTextParam &operator = (const XTextParam &vtp)
 	{
 		val = vtp.val;
@@ -509,6 +515,9 @@ public:
 				XSingleParam(iparam.pname),
 				min(iparam.min), max(iparam.max),
 				val(iparam.val)
+	{ }
+	XIntParam(XIntParam &&_xip) : XSingleParam(std::move(_xip)),
+			min(_xip.min), max(_xip.max), val(_xip.val)
 	{ }
 
 	//XIntParam &operator = (const XIntParam &vip) { val = vip.val; }
@@ -585,6 +594,7 @@ public:
 	 * means we don't want to check parameter boundries.
 	 */
 	XFloatParam(const string &_pname,const XFloat &_min,const XFloat &_max);
+	XFloatParam(XFloatParam &&_xfp);
 
 	XFloatParam &operator = (const XFloatParam &vip)
 	{
@@ -638,6 +648,9 @@ public:
 	XEnumParam(const string &_pname,
 			unsigned short _def) :
 			XSingleParam(_pname), def(_def), val(_def)
+			{}
+	XEnumParam(XEnumParam &&_xep) : XSingleParam(std::move(_xep)),
+				def(_xep.def), val(_xep.def)
 			{}
 	XEnumParam &operator = (const XEnumParam &vp) 
 	{ 
@@ -725,6 +738,11 @@ public:
 
 	XSetParam(const string &_pname) : XMixParam(_pname),
 						smapEnabled(false) {}
+	XSetParam(XSetParam &&_xsp) : XMixParam(std::move(_xsp)),
+		smap(std::move(_xsp.smap)), smapEnabled(_xsp.smapEnabled)
+	{ 	
+		params = std::move(_xsp.params);
+	}
 	/**
 	 * \param node pointer to parameter node in XML document.
 	 */
@@ -1085,6 +1103,8 @@ public:
 
 	XISetParam(const string &_pname) : _XSetParam(_pname)
 	{ }
+	XISetParam(XISetParam &&_xisp) : _XSetParam(std::move(_xisp))
+	{ }
 
 protected:
 	virtual T *newT(const XParam::XmlNode *node) throw (Exception)
@@ -1135,6 +1155,9 @@ public:
 	using _XSetParam::smapEnabled;
 
 	XListParam(const string &_pname) : _XISetParam(_pname)
+	{}
+	XListParam(XListParam &&_xlp) : _XISetParam(std::move(_xlp)),
+					smap(std::move(_xlp.smap))
 	{}
 
 	/**

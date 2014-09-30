@@ -39,6 +39,15 @@ _XMixParam<List>::_XMixParam(const string& _pname) :
 }
 
 template<typename List>
+_XMixParam<List>::_XMixParam(_XMixParam &&_xmp) : XParam(std::move(_xmp)),
+					dbengine(_xmp.dbengine)
+{ 
+	/* We cant move params, because XMixParam is mix of some fixed
+	 * parameters.
+	 */
+}
+
+template<typename List>
 XParam *_XMixParam<List>::value(int index) const 
 { 
 	int i = 0;

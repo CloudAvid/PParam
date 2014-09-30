@@ -55,6 +55,8 @@ public:
 	{
 		reset();
 	}
+	UUIDParam(const UUIDParam &);
+	UUIDParam(UUIDParam &&);
 	UUIDParam &operator = (const UUIDParam &);
 	XParam &operator = (const string &) throw (Exception);
 	XParam &operator = (const XParam &) throw (Exception);
@@ -78,6 +80,8 @@ public:
 	CryptoParam(const string &name) : XTextParam(name)
 	{
 	}
+	CryptoParam(CryptoParam &&_cp) : XTextParam(std::move(_cp))
+	{ }
 	virtual XParam &operator = (const string &text)
 	{
 		val = text;
@@ -136,7 +140,8 @@ class BoolParam : public XEnumParam<Bool>
 public:
 	typedef XEnumParam<Bool>	_XEnumParam;
 
-	BoolParam(const string &pname,const unsigned short _default =Bool::YES);
+	BoolParam(const string &pname, unsigned short _default =Bool::YES);
+	BoolParam(BoolParam &&_bp);
 	bool is_enable() const;
 	bool is_disable() const;
 	void yes();
@@ -176,6 +181,9 @@ public:
 		month = date.month;
 		day = date.day;
 	}
+	DateParam(DateParam &&_dp) : XSingleParam(std::move(_dp)),
+		year(_dp.year), month(_dp.month), day(_dp.day)
+	{ }
 	DateParam &operator = (const DateParam &) throw (Exception);
 	XParam &operator = (const string &) throw (Exception);
 	XParam &operator = (const XParam &) throw (Exception);
@@ -254,6 +262,9 @@ public:
 		minute = time.minute;
 		second = time.second;
 	}
+	TimeParam(TimeParam &&_tp) : XSingleParam(std::move(_tp)),
+		hour(_tp.hour), minute(_tp.minute), second(_tp.second)
+	{ }
 	TimeParam &operator = (const TimeParam &) throw (Exception);
 	XParam &operator = (const string &) throw (Exception);
 	XParam &operator = (const XParam &) throw (Exception);
@@ -324,6 +335,9 @@ public:
 	{
 
 	}
+	DateTime(DateTime &&_dt) : XSingleParam(std::move(_dt)),
+			date(std::move(_dt.date)), time(std::move(_dt.time))
+	{ }
 	DateParam &get_date()
 	{
 		return date;
@@ -438,6 +452,8 @@ public:
 	IPType() : XTextParam("ip")
 	{
 	}
+	IPType(IPType &&_it) : XTextParam(std::move(_it)), version(_it.version)
+	{ }
 	int get_version()
 	{
 		return version;
@@ -467,13 +483,6 @@ class IPParam: public XSingleParam
 public:
 	typedef	IPType	Type;
 
-	IPParam() : XSingleParam("IPParam")
-	{
-		address[0] = address[1] = address[2] = address[3] = address[4] =
-			address[5] = address[6] = address[7] = 0;
-		netmask = 32;
-		containNetmask = false;
-	}
 	/**
 	 * Constructor of IPParam class.
 	 * \param name [in] specifies name of this Parameter
@@ -485,6 +494,20 @@ public:
 			address[5] = address[6] = address[7] = 0;
 		netmask = 32;
 		containNetmask = false;
+	}
+	IPParam() : XSingleParam("IPParam")
+	{
+		address[0] = address[1] = address[2] = address[3] = address[4] =
+			address[5] = address[6] = address[7] = 0;
+		netmask = 32;
+		containNetmask = false;
+	}
+	IPParam(IPParam &&_ip) : XSingleParam(std::move(_ip)), 
+		ipType(std::move(_ip.ipType)), netmask(_ip.netmask),
+		containNetmask(_ip.containNetmask)
+	{
+		for (int i = 0; i < 8; ++i)
+			address[i] = _ip.address[i];
 	}
 	bool key(string &_key)
 	{
@@ -684,6 +707,8 @@ public:
 
 		reset();
 	}
+	IPv4Param(IPv4Param &&_ip) : IPParam(std::move(_ip))
+	{ }
 	virtual void type(Type &_type) const
 	{
 		_type.set_type(get_pname(), IPType::IPv4);
@@ -895,6 +920,8 @@ public:
 
 		reset();
 	}
+	IPv6Param(IPv6Param &&_ip) : IPParam(std::move(_ip))
+	{ }
 	virtual void type(Type &_type) const
 	{
 		_type.set_type(get_pname(), IPType::IPv6);
@@ -1056,6 +1083,13 @@ public:
 		ipv4 = NULL;
 		ipv6 = NULL;
 	}
+	IPxParam(IPxParam &&_ipx) : IPParam(std::move(_ipx)),
+		version(_ipx.version), ipv4(_ipx.ipv4), ipv6(_ipx.ipv6)
+	{
+		_ipx.version = IPType::MAX;
+		_ipx.ipv4 = NULL;
+		_ipx.ipv6 = NULL;
+	}
 	/**
 	 * Set IP address of this instance using another IPx object
 	 */
@@ -1115,6 +1149,14 @@ public:
 		addParam(&_not);
 
 		_not.no();
+	}
+	IPxRangeParam(IPxRangeParam &&_ipxr) : XMixParam(std::move(_ipxr)),
+		from(std::move(_ipxr.from)), to(std::move(_ipxr.to)),
+		_not(std::move(_ipxr._not))
+	{ 
+		addParam(&from);
+		addParam(&to);
+		addParam(&_not);
 	}
 	bool is_not()
 	{
@@ -1271,11 +1313,17 @@ protected:
 class IPList : public XISetParam<IPParam, string>
 {
 public:
-	IPList(const string &name) : XISetParam<IPParam, string>(name)
+	typedef XISetParam<IPParam, string>	_XISetParam;
+
+	IPList(const string &name) : _XISetParam(name)
 	{
 		openCharacter = '[';
 		closeCharacter = ']';
 	}
+	IPList(IPList &&_ipl) : _XISetParam(std::move(_ipl)),
+			openCharacter(_ipl.openCharacter), 
+			closeCharacter(_ipl.closeCharacter)
+	{ }
 	void setSurroundedCharacters(const char _open,const char _close)
 	{
 		openCharacter = _open;
@@ -1332,11 +1380,17 @@ private:
 class IPxList : public XSetParam<IPxParam, string>
 {
 public:
-	IPxList(const string &name) : XSetParam<IPxParam, string>(name)
+	typedef XSetParam<IPxParam, string> 	_XSetParam;
+
+	IPxList(const string &name) : _XSetParam(name)
 	{
 		openCharacter = '[';
 		closeCharacter = ']';
 	}
+	IPxList(IPxList &&_ipxl) : _XSetParam(std::move(_ipxl)),
+			openCharacter(_ipxl.openCharacter), 
+			closeCharacter(_ipxl.closeCharacter)
+	{ }
 	void setSurroundedCharacters(const char _open,const char _close)
 	{
 		openCharacter = _open;
@@ -1417,6 +1471,11 @@ public:
 		to = port.to;
 		portString = port.portString;
 	}
+	PortParam(PortParam &&_pp) : XSingleParam(std::move(_pp)),
+		notSign(_pp.notSign), portRange(_pp.portRange), 
+		portString(std::move(_pp.portString)),
+		from(_pp.from), to(_pp.to)
+	{ }
 	bool key(string &_key)
 	{
 		_key = portString;
@@ -1471,14 +1530,20 @@ private:
 class PortList : public XSetParam<PortParam,string>
 {
 public:
+	typedef XSetParam<PortParam,string>	_XSetParam;
 	PortList(const string &name,const string &portName = "port") :
-		XSetParam<PortParam,string>(name)
+		_XSetParam(name)
 	{
 		openCharacter = '[';
 		closeCharacter = ']';
 
 		enable_smap();
 	}
+	PortList(PortList &&_pl) : _XSetParam(std::move(_pl)),
+		openCharacter(_pl.openCharacter),
+		closeCharacter(_pl.closeCharacter),
+		port(std::move(_pl.port))
+	{ }
 	PortParam *addPort(const string &_port)
 	{
 		PortParam	portParam(port.get_pname());
@@ -1523,8 +1588,8 @@ public:
 	}
 
 private:
-	char		closeCharacter;
 	char		openCharacter;
+	char		closeCharacter;
 	PortParam	port;
 };
 
@@ -1540,6 +1605,8 @@ public:
 	{
 		set_value("00:00:00:00:00:00");
 	}
+	MACAddressParam(MACAddressParam &&_map) : XTextParam(std::move(_map))
+	{ }
 	bool key(string &_key)
 	{
 		_key = value();
@@ -1582,6 +1649,11 @@ public:
 	{
 		addParam(&type);
 	}
+	DBEngineType(DBEngineType &&_det) : XMixParam(std::move(_det)),
+			type(std::move(_det.type))
+	{ 
+		addParam(&type);
+	}
 	void set_type(int x) throw (Exception)
 	{
 		type.set_value(x);
@@ -1608,11 +1680,19 @@ class DBEngineParam: public XMixParam
 {
 public:
 	typedef DBEngineType Type;
-	DBEngineParam(const string &pname) :
-		XMixParam(pname), connectionstring("connectionstring"), dbe(0)
+	DBEngineParam(const string &pname) : XMixParam(pname), 
+		connectionstring("connectionstring"), dbe(NULL)
 	{
 		addParam(&connectionstring);
 		addParam(dbetype.getTypeParam());
+	}
+	DBEngineParam(DBEngineParam &&_dep) : XMixParam(std::move(_dep)),
+		connectionstring(std::move(_dep.connectionstring)),
+		dbe(_dep.dbe), dbetype(std::move(_dep.dbetype))
+	{ 
+		addParam(&connectionstring);
+		addParam(dbetype.getTypeParam());
+		_dep.dbe = NULL;
 	}
 	DBEngineParam &operator =(const DBEngineParam &dbe) throw (Exception)
 	{
@@ -1713,12 +1793,16 @@ protected:
 class SQLiteDBEngineParam: public DBEngineParam
 {
 public:
-	SQLiteDBEngineParam(const string &pname) :
-		DBEngineParam(pname)
+	SQLiteDBEngineParam(const string &pname) : DBEngineParam(pname)
 	{
 		sqlitedb = new SQLiteDBEngine();
 		dbe = (XDBEngine*) sqlitedb;
 		dbetype.set_type(DBEngineTypes::SQLite);
+	}
+	SQLiteDBEngineParam(SQLiteDBEngineParam &&_dep) : 
+		DBEngineParam(std::move(_dep)), sqlitedb(_dep.sqlitedb)
+	{
+		_dep.sqlitedb = NULL;
 	}
 	using DBEngineParam::operator =;
 	SQLiteDBEngine *SqliteDBEngine()

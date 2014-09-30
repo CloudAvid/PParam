@@ -13,6 +13,16 @@ const string DBEngineTypes::typeString[DBEngineTypes::MAX]={"sqlite"};
 
 /* Implementation of "UUIDParam" Class
  */
+UUIDParam::UUIDParam(const UUIDParam &uuidp) : XSingleParam(uuidp.get_pname())
+{
+	*this = uuidp;
+}
+
+UUIDParam::UUIDParam(UUIDParam &&_uuidp) : XSingleParam(std::move(_uuidp))
+{
+	*this = _uuidp;
+}
+
 UUIDParam &UUIDParam::operator = (const UUIDParam &uuidp)
 {
 	uuid_copy(uuid, uuidp.uuid);
@@ -91,6 +101,9 @@ BoolParam::BoolParam(const string &pname,const unsigned short _default) :
 	XEnumParam<Bool>(pname, _default)
 {
 }
+
+BoolParam::BoolParam(BoolParam &&_bp) : _XEnumParam(std::move(_bp))
+{ }
 
 bool BoolParam::is_enable() const
 {

@@ -12,6 +12,10 @@ XParam::XParam()
 	runtime = false;
 }
 
+XParam::XParam(XParam &&_xp) : pname(std::move(_xp.pname)), 
+			version(std::move(_xp.version)), runtime(_xp.runtime)
+{ }
+
 XParam::XParam(const string &_pname) :
 	pname(_pname)
 {
@@ -158,6 +162,10 @@ XSingleParam::XSingleParam(const string& _pname) :
 {
 }
 
+XSingleParam::XSingleParam(XSingleParam &&_xsp) : XParam(std::move(_xsp))
+{
+}
+
 XParam& XSingleParam::operator =(const XmlNode* node) throw (Exception)
 {
 	XParam* vparam = this;
@@ -238,6 +246,11 @@ XParam& XTextParam::operator =(const XParam& xp) throw (Exception)
 XFloatParam::XFloatParam(const string& _pname, const XParam::XFloat& _min,
 	const XParam::XFloat& _max) :
 	XSingleParam(_pname), min(_min), max(_max), val(_min)
+{
+}
+
+XFloatParam::XFloatParam(XFloatParam &&_xfp) : XSingleParam(std::move(_xfp)), 
+			min(_xfp.min), max(_xfp.max), val(_xfp.min)
 {
 }
 

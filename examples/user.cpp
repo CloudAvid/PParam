@@ -61,6 +61,21 @@ public:
 		enabled.yes();
 		loginDate.now();
 	}
+	User(User &&user) : XMixParam(std::move(user)),
+			    role(std::move(user.role)),
+			    fullName(std::move(user.fullName)),
+			    username(std::move(user.username)),
+			    password(std::move(user.password)),
+			    enabled(std::move(user.enabled)),
+			    loginDate(std::move(user.loginDate))
+	{
+		addParam(&role);
+		addParam(&fullName);
+		addParam(&username);
+		addParam(&password);
+		addParam(&enabled);
+		addParam(&loginDate);
+	}
 	void set_fullName(const string _fullName)
 	{
 		fullName = _fullName;
@@ -92,6 +107,10 @@ int main()
 	user.set_username("exam");
 	user.set_password("example");
 	cout << user.xml(true, 8, true);
+
+	User uuser(std::move(user));
+	cout << user.xml(true, 8, true);
+	cout << uuser.xml(true, 8, true);
 
 	return 0;
 }
