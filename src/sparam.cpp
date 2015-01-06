@@ -477,8 +477,30 @@ unsigned long DateParam::daysOfDate()
 	return days;
 }
 
-/* Implementation of "TimeParam" class
- */
+/* Implementation of "TimeParam" class */
+
+TimeParam::TimeParam(const string &name) :
+	XSingleParam(name)
+{
+	hour = minute = second = 0;
+}
+
+TimeParam::TimeParam(const TimeParam &time) :
+	XSingleParam(time.get_pname())
+{
+	hour = time.hour;
+	minute = time.minute;
+	second = time.second;
+}
+
+TimeParam::TimeParam(TimeParam &&_tp) :
+	XSingleParam(std::move(_tp)),
+	hour(_tp.hour),
+	minute(_tp.minute),
+	second(_tp.second)
+{
+}
+ 
 TimeParam &TimeParam::operator = (const TimeParam &timeParam)
 					throw (Exception)
 {
@@ -605,7 +627,15 @@ TimeParam TimeParam::operator + (const TimeParam &time)
 
 long TimeParam::operator - (const TimeParam &time)
 {
-	return secondsOfTime() - time.secondsOfTime();
+	int	midnight = (*this > time) ? 1 : 0;
+
+	/*
+	 * If this is less than or equal to time, we just calculate the
+	 * difference of them, otherwise, we calculate the difference of this
+	 * and midnight and difference of time and midnight and then sum these
+	 * two differences.
+	 */
+	return midnight * 86400 - secondsOfTime() + time.secondsOfTime();
 }
 
 TimeParam TimeParam::add(const TimeParam &time,unsigned char &day)
@@ -628,6 +658,36 @@ TimeParam TimeParam::add(const TimeParam &time,unsigned char &day)
 
 	return result;
 
+}
+
+unsigned short TimeParam::get_hour() const
+{
+	return hour;
+}
+
+void TimeParam::set_hour(unsigned short _hour)
+{
+	hour = _hour;
+}
+
+unsigned short TimeParam::get_minute() const
+{
+	return minute;
+}
+
+void TimeParam::set_minute(unsigned short _minute)
+{
+	minute = _minute;
+}
+
+unsigned int TimeParam::get_second() const
+{
+	return second;
+}
+
+void TimeParam::set_second(unsigned int _second)
+{
+	second = _second;
 }
 
 void TimeParam::get_time(unsigned short &_hour,
@@ -665,6 +725,11 @@ string TimeParam::value() const
 	timeString.assign(time);
 
 	return timeString;
+}
+
+void TimeParam::reset()
+{
+	hour = minute = second = 0;
 }
 
 string TimeParam::formattedValue(const string format) const

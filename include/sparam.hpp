@@ -252,19 +252,9 @@ private:
 class TimeParam : public XSingleParam
 {
 public:
-	TimeParam(const string &name) : XSingleParam(name)
-	{
-		hour = minute = second = 0;
-	}
-	TimeParam(const TimeParam &time) : XSingleParam(time.get_pname())
-	{
-		hour = time.hour;
-		minute = time.minute;
-		second = time.second;
-	}
-	TimeParam(TimeParam &&_tp) : XSingleParam(std::move(_tp)),
-		hour(_tp.hour), minute(_tp.minute), second(_tp.second)
-	{ }
+	TimeParam(const string &name);
+	TimeParam(const TimeParam &time);
+	TimeParam(TimeParam &&_tp);
 	TimeParam &operator = (const TimeParam &) throw (Exception);
 	XParam &operator = (const string &) throw (Exception);
 	XParam &operator = (const XParam &) throw (Exception);
@@ -277,42 +267,22 @@ public:
 	TimeParam operator + (const TimeParam &);
 	long operator - (const TimeParam &);
 	TimeParam add(const TimeParam &,unsigned char &);
-	unsigned short get_hour() const
-	{
-		return hour;
-	}
-	void set_hour(unsigned short _hour)
-	{
-		hour = _hour;
-	}
-	unsigned short get_minute() const
-	{
-		return minute;
-	}
-	void set_minute(unsigned short _minute)
-	{
-		minute = _minute;
-	}
-	unsigned int get_second() const
-	{
-		return second;
-	}
-	void set_second(unsigned int _second)
-	{
-		second = _second;
-	}
+	unsigned short get_hour() const;
+	void set_hour(unsigned short _hour);
+	unsigned short get_minute() const;
+	void set_minute(unsigned short _minute);
+	unsigned int get_second() const;
+	void set_second(unsigned int _second);
 	void get_time(unsigned short &,unsigned short &,unsigned int &) const;
 	void set_time(unsigned short,unsigned short,unsigned int);
 	bool isValid();
 	string value() const;
-	virtual void reset()
-	{
-		hour = minute = second = 0;
-	}
+	virtual void reset();
 	string formattedValue(const string format) const;
 	void now();
 
 private:
+	/** \return Returns the number of seconds passed from midnight */
 	unsigned long secondsOfTime() const;
 
 private:
