@@ -1,7 +1,10 @@
 # Introduction
 PParam is a portable parameter definition framework for C++.
+
 By PParam developer could define his parameter structure, and then easily convert it to XML/JSON or save in database and also load parameter from XML/JSON doc or database.
+
 At now PParam supports conversion to/from XML and also have an experimental support of SQLite. 
+
 PParam introduces a new method for designing object-oriented programs that is called XObject. XObject defines a real world as a set of objects and their connections. This method reduces design complexity and increases flexibility and stability of a system.
 
 Any try to add more features to PParams is welcome.
