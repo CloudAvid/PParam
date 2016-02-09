@@ -174,12 +174,18 @@ XParam& XSingleParam::operator =(const XmlNode* node) throw (Exception)
 
 	XmlNode::NodeList nlist = node->get_children();
 	for (XmlNode::NodeList::iterator iter = nlist.begin();
-		iter != nlist.end(); ++iter) {
-		const xmlpp::TextNode* nText =
-			dynamic_cast<const xmlpp::TextNode*>(*iter);
-		if (nText) {
-			(*vparam) = stripBlanks(nText->get_content());
-		}
+			iter != nlist.end(); ++iter) {
+		/* If node is comment, ignore it */
+		const xmlpp::CommentNode* nComment =
+			dynamic_cast<const xmlpp::CommentNode*>(*iter);
+		if (nComment)
+			continue;
+
+		/* Read text or CData nodes */
+		const xmlpp::ContentNode* nContent =
+			dynamic_cast<const xmlpp::ContentNode*>(*iter);
+		if (nContent)
+			(*vparam) = stripBlanks(nContent->get_content());
 	}
 
 	return (*this);
@@ -217,11 +223,47 @@ string XSingleParam::_xml(bool show_runtime, const int& indent,
 	return ind + "<" + pname + ver + ">" + val + "</" + pname + ">" + endl;
 }
 
-/* Implementation of "XTextParam" class
- */
-XParam& XTextParam::operator =(const XParam& xp) throw (Exception)
+/* Implementation of "XTextParam" class */
+
+XTextParam::XTextParam(const string &_pname) :
+	XSingleParam(_pname),
+	cdata(false),
+	val("")
+{
+}
+
+XTextParam::XTextParam(XTextParam &&_xtp) :
+	XSingleParam(std::move(_xtp)),
+	cdata(std::move(_xtp.cdata)),
+	val(std::move(_xtp.val))
+{
+}
+
+XTextParam &XTextParam::operator = (const XTextParam &vtp)
+{
+	val = vtp.val;
+	
+	return *this;
+}
+
+XParam &XTextParam::operator = (const string &str)
+{
+	set_value(str);
+
+	return *this;
+}
+
+XParam &XTextParam::operator = (const char *str)
+{
+	set_value(str);
+
+	return *this;
+}
+
+XParam &XTextParam::operator = (const XParam &xp) throw (Exception)
 {
 	const XTextParam* xtp = dynamic_cast<const XTextParam*>(&xp);
+
 	if (xtp == NULL)
 		throw Exception("Bad text XParam in assignment !",
 			TracePoint("pparam"));
@@ -238,7 +280,52 @@ XParam& XTextParam::operator =(const XParam& xp) throw (Exception)
 		throw e;
 	}
 	val = xtp->val;
+
 	return *this;
+}
+
+string XTextParam::value() const
+{
+	return cdata ? "<![CDATA[" + val + "]]>" : val;
+}
+
+void XTextParam::reset()
+{
+	val = "";
+}
+
+void XTextParam::set_cdata(const bool _cdata)
+{
+	cdata = _cdata;
+}
+
+void XTextParam::set_value(const string &str) 
+{ 
+	val = str;
+}
+
+void XTextParam::set_value(const char *str) 
+{ 
+	val.assign(str);
+}
+
+string XTextParam::get_value() const
+{
+	return val;
+}
+
+bool XTextParam::empty() const
+{
+	return val.empty();
+}
+
+const char *XTextParam::c_str()
+{
+	return val.c_str();
+}
+
+XTextParam::~XTextParam()
+{
 }
 
 /* Implementation of "XFloatParam" Class

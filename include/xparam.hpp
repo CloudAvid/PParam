@@ -443,47 +443,27 @@ typedef _XMixParam<std::vector<XParam *> > XMixParam;
 class XTextParam : public XSingleParam
 {
 public:
-	XTextParam(const string &_pname) : XSingleParam(_pname), val("") {}
-	XTextParam(XTextParam &&_xtp) : XSingleParam(std::move(_xtp)),
-					val(std::move(_xtp.val))
-	{ }
-	XTextParam &operator = (const XTextParam &vtp)
-	{
-		val = vtp.val;
-		
-		return *this;
-	}
-	virtual XParam &operator = (const string &str)
-	{
-		set_value(str);	
-		return *this;
-	}
-	virtual XParam &operator = (const char *str)
-	{
-		set_value(str);
-		return *this;
-	}
-	virtual XParam &operator = (const XParam &xp)
-						throw (Exception);
-	string value() const { return val; }
-	virtual void reset() { val = ""; }
-	void set_value(const string &str) 
-	{ 
-		val = str;
-	}
-	void set_value(const char *str) 
-	{ 
-		val.assign(str);
-	}
-	string get_value() const { return val; }
-	bool empty() const { return val.empty(); }
-	const char *c_str() { return val.c_str(); }
+	XTextParam(const string &_pname);
+	XTextParam(XTextParam &&_xtp);
+	XTextParam &operator = (const XTextParam &vtp);
+	virtual XParam &operator = (const string &str);
+	virtual XParam &operator = (const char *str);
+	virtual XParam &operator = (const XParam &xp) throw (Exception);
+	string value() const;
+	virtual void reset();
+	void set_cdata(const bool _cdata);
+	void set_value(const string &str);
+	void set_value(const char *str);
+	string get_value() const;
+	bool empty() const;
+	const char *c_str();
+	virtual ~XTextParam();
 
-	virtual ~XTextParam() {}
 protected:
-	/** parameter value
-	 */
-	string val;
+	/* Determines generating XML in CDATA format or not */
+	bool	cdata;
+	/** parameter value */
+	string	val;
 };
 
 /**

@@ -280,8 +280,6 @@ public:
 	virtual void reset();
 	string formattedValue(const string format) const;
 	void now();
-
-private:
 	/** \return Returns the number of seconds passed from midnight */
 	unsigned long secondsOfTime() const;
 
