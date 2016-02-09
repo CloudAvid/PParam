@@ -963,11 +963,15 @@ IPParam* IPParam::getIP(string name, string iIP)
 		IPv4Param *ip4 = new IPv4Param(name);
 		*ip4 = iIP;
 		return ip4;
+	} catch (std::bad_alloc &exception) {
+		throw Exception(exception.what(), TracePoint("sparam"));
 	} catch (Exception &exp) {
 		try {
 			IPv6Param *ip6 = new IPv6Param(name);
 			*ip6 = iIP;
 			return ip6;
+		} catch (std::bad_alloc &exception) {
+			throw Exception(exception.what(), TracePoint("sparam"));
 		} catch (Exception &e) {
 		//	throw Exception("IP address is not valid",
 			throw Exception("IP '" + iIP + "' is not valid",
@@ -1781,10 +1785,24 @@ void IPxParam::set(const XParam &iIP)
 
 void IPxParam::setAddress(const string &iIP)
 {
-	if (version == IPType::IPv4)
-		return ipv4->setAddress(iIP);
-	if (version == IPType::IPv6)
-		return ipv6->setAddress(iIP);
+	IPParam	*ip = getIP(get_pname(), iIP);
+
+	try {
+		if (ip->getIPVersion() == IPType::IPv4) {
+			if (ipv4)
+				delete ipv4;
+			ipv4 = dynamic_cast<IPv4Param*>(ip);
+			version = IPType::IPv4;
+			ipv4->setAddress(iIP);
+		} else if (ip->getIPVersion() == IPType::IPv6) {
+			if (ipv6)
+				delete ipv6;
+			ipv6 = dynamic_cast<IPv6Param*>(ip);
+			version = IPType::IPv6;
+			ipv6->setAddress(iIP);
+		}
+	} catch (std::bad_alloc &exception) {
+	}
 }
 
 void IPxParam::setNetmask(const unsigned int &iNetmask)
@@ -1828,6 +1846,227 @@ bool IPxParam::checkNetworkAvailability(string IPAddress) const
 	if (version == IPType::IPv6)
 		return ipv6->checkNetworkAvailability(IPAddress);
 	return false;
+}
+
+/* Implementation of "IPxRangeParam" class */
+
+IPxRangeParam::IPxRangeParam(const string &pname) :
+	XMixParam(pname),
+	from("from"),
+	to("to"),
+	_not("not")
+{
+	addParam(&from);
+	addParam(&to);
+	addParam(&_not);
+
+	_not.no();
+}
+
+IPxRangeParam::IPxRangeParam(IPxRangeParam &&_ipxr) :
+	XMixParam(std::move(_ipxr)),
+	from(std::move(_ipxr.from)),
+	to(std::move(_ipxr.to)),
+	_not(std::move(_ipxr._not))
+{ 
+	addParam(&from);
+	addParam(&to);
+	addParam(&_not);
+}
+
+bool IPxRangeParam::is_not()
+{
+	return _not.is_enable();
+}
+
+void IPxRangeParam::set_not()
+{
+	_not.yes();
+}
+
+void IPxRangeParam::unset_not()
+{
+	_not.no();
+}
+
+bool IPxRangeParam::has_from()
+{
+	return ! from.value().empty();
+}
+
+bool IPxRangeParam::has_to()
+{
+	return ! to.value().empty();
+}
+
+string IPxRangeParam::getFrom()
+{
+	return from.value();
+}
+
+string IPxRangeParam::getTo()
+{
+	return to.value();
+}
+
+IPxParam &IPxRangeParam::get_from()
+{
+	return from;
+}
+
+IPxParam &IPxRangeParam::get_to()
+{
+	return to;
+}
+
+bool IPxRangeParam::key(string &_key)
+{
+	_key = value();
+	return true;
+}
+
+string IPxRangeParam::get_key()
+{
+	return value();
+}
+
+string IPxRangeParam::value()
+{
+	string val = (is_not()) ? "!" : "";
+	val += from.getAddress();
+	if (to.getAddress() != "0.0.0.0")
+		val += '-' + to.getAddress();
+
+	return val;
+}
+
+IPType::Version IPxRangeParam::getIPVersion()
+{
+	return from.getIPVersion();
+}
+
+string IPxRangeParam::getAddressFrom() const
+{
+	return from.getAddress();
+}
+
+string IPxRangeParam::getAddressTo() const
+{
+	return to.getAddress();
+}
+
+string IPxRangeParam::getBroadcastFrom() const
+{
+	return from.getBroadcast();
+}
+
+string IPxRangeParam::getBroadcastTo() const
+{
+	return to.getBroadcast();
+}
+
+string IPxRangeParam::getUnicastFrom() const
+{
+	return from.getUnicast();
+}
+
+string IPxRangeParam::getUnicastTo() const
+{
+	return to.getUnicast();
+}
+
+void IPxRangeParam::setFrom(const string &iIP)
+{
+	from = iIP;
+	if (from.getIPVersion() != to.getIPVersion())
+		to = "";
+}
+
+void IPxRangeParam::setTo(const string &iIP) throw (Exception)
+{
+	if (!has_from())
+		throw Exception("No IP address sets for from",
+				TracePoint("sparam")
+				);
+
+	to = iIP;
+	if (from.getIPVersion() != to.getIPVersion()) {
+		to = "";
+
+		throw Exception("IP version mismatch", TracePoint("sparam"));
+	}
+}
+
+void IPxRangeParam::setFrom(const XParam &iIP)
+{
+	from.set(iIP);
+}
+
+void IPxRangeParam::setTo(const XParam &iIP)
+{
+	to.set(iIP);
+}
+
+void IPxRangeParam::setAddressFrom(const string &iIP)
+{
+	from.setAddress(iIP);
+	if (from.getIPVersion() != to.getIPVersion())
+		to = "";
+}
+
+void IPxRangeParam::setAddressTo(const string &iIP)
+{
+	if (!has_from())
+		throw Exception("No IP address sets for from",
+				TracePoint("sparam")
+				);
+
+	to.setAddress(iIP);
+	if (from.getIPVersion() != to.getIPVersion()) {
+		to = "";
+
+		throw Exception("IP version mismatch", TracePoint("sparam"));
+	}
+}
+
+void IPxRangeParam::setNetmaskFrom(const unsigned int &iNetmask)
+{
+	from.setNetmask(iNetmask);
+}
+
+void IPxRangeParam::setNetmaskTo(const unsigned int &iNetmask)
+{
+	to.setNetmask(iNetmask);
+}
+
+void IPxRangeParam::setNetmaskFrom(const string &iNetmask)
+{
+	from.setNetmask(iNetmask);
+}
+
+void IPxRangeParam::setNetmaskTo(const string &iNetmask)
+{
+	to.setNetmask(iNetmask);
+}
+
+int IPxRangeParam::getNetmaskFrom() const
+{
+	return from.getNetmask();
+}
+
+int IPxRangeParam::getNetmaskTo() const
+{
+	return to.getNetmask();
+}
+
+string IPxRangeParam::getNetmaskStringFrom() const
+{
+	return from.getNetmaskString();
+}
+
+string IPxRangeParam::getNetmaskString() const
+{
+	return to.getNetmaskString();
 }
 
 /* Implementation of "PortParam" class 

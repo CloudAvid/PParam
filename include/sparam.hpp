@@ -1105,162 +1105,70 @@ private:
 /**
  * \class IPxRangeParam
  * Defines range of ip addresses.
+ * XML Format: <TAG-NAME>FROM[-TO]</TAG-NAME>
+ * 	TAG-NAME: Name of tag. Default is "ipx_range"
+ * 	FROM: IP address in form of IPv4 or IPv6
+ * 	TO: Optional IP address in form of IPv4 or IPv6
  */
 class IPxRangeParam : public XMixParam
 {
 public:
-	IPxRangeParam(const string &pname = "ipx_range") : XMixParam(pname),
-				from("from"), to("to"), _not("not")
-	{
-		addParam(&from);
-		addParam(&to);
-		addParam(&_not);
+	IPxRangeParam(const string &pname = "ipx_range");
+	IPxRangeParam(IPxRangeParam &&_ipxr);;
+	bool is_not();
+	void set_not();
+	void unset_not();
+	bool has_from();
+	bool has_to();
+	string getFrom();
+	string getTo();
+	IPxParam &get_from();
+	IPxParam &get_to();
+	bool key(string &_key);
+	string get_key();
+	virtual string value();
+	virtual IPType::Version getIPVersion();
+	virtual string getAddressFrom() const;
+	virtual string getAddressTo() const;
+	virtual string getBroadcastFrom() const;
+	virtual string getBroadcastTo() const;
+	virtual string getUnicastFrom() const;
+	virtual string getUnicastTo() const;
+	/**
+	 * Sets IP address and netmask for "from" part
+	 * If "to" part was already set and its'version is different with given
+	 * IP address, "to" part will be emptied
+	 */
+	virtual void setFrom(const string &iIP);
+	/**
+	 * Sets IP address and netmask for "to" part
+	 * An exception will be thrown, if either "from" part was not set or
+	 * version of given IP address is different with "from" part
+	 */
+	virtual void setTo(const string &iIP) throw (Exception);
+	virtual void setFrom(const XParam &iIP);
+	virtual void setTo(const XParam &iIP);
+	/**
+	 * Sets IP address for "from" part
+	 * If "to" part was already set and its'version is different with given
+	 * IP address, "to" part will be emptied
+	 */
+	virtual void setAddressFrom(const string &iIP);
+	/**
+	 * Sets IP address for "to" part
+	 * An exception will be thrown, if either "from" part was not set or
+	 * version of given IP address is different with "from" part
+	 */
+	virtual void setAddressTo(const string &iIP);
+	virtual void setNetmaskFrom(const unsigned int &iNetmask);
+	virtual void setNetmaskTo(const unsigned int &iNetmask);
+	virtual void setNetmaskFrom(const string &iNetmask);
+	virtual void setNetmaskTo(const string &iNetmask);
+	virtual int getNetmaskFrom() const;
+	virtual int getNetmaskTo() const;
+	virtual string getNetmaskStringFrom() const;
+	virtual string getNetmaskString() const;
 
-		_not.no();
-	}
-	IPxRangeParam(IPxRangeParam &&_ipxr) : XMixParam(std::move(_ipxr)),
-		from(std::move(_ipxr.from)), to(std::move(_ipxr.to)),
-		_not(std::move(_ipxr._not))
-	{ 
-		addParam(&from);
-		addParam(&to);
-		addParam(&_not);
-	}
-	bool is_not()
-	{
-		return _not.is_enable();
-	}
-	void set_not()
-	{
-		_not.yes();
-	}
-	void unset_not()
-	{
-		_not.no();
-	}
-	bool has_from()
-	{
-		return ! from.value().empty();
-	}
-	bool has_to()
-	{
-		return ! to.value().empty();
-	}
-	string getFrom()
-	{
-		return from.value();
-	}
-	string getTo()
-	{
-		return to.value();
-	}
-	IPxParam &get_from()
-	{
-		return from;
-	}
-	IPxParam &get_to()
-	{
-		return to;
-	}
-	bool key(string &_key)
-	{
-		_key = value();
-		return true;
-	}
-	string get_key()
-	{
-		return value();
-	}
-	virtual string value()
-	{
-		string val = (is_not()) ? "!" : "";
-		val += from.value() + ":" + to.value();
-		return val;
-	}
-	virtual IPType::Version getIPVersion()
-	{
-		return from.getIPVersion();
-	}
-	virtual string getAddressFrom() const
-	{
-		return from.getAddress();
-	}
-	virtual string getAddressTo() const
-	{
-		return to.getAddress();
-	}
-	virtual string getBroadcastFrom() const
-	{
-		return from.getBroadcast();
-	}
-	virtual string getBroadcastTo() const
-	{
-		return to.getBroadcast();
-	}
-	virtual string getUnicastFrom() const
-	{
-		return from.getUnicast();
-	}
-	virtual string getUnicastTo() const
-	{
-		return to.getUnicast();
-	}
-	virtual void setFrom(const string &iIP)
-	{
-		from.set(iIP);
-	}
-	virtual void setTo(const string &iIP)
-	{
-		to.set(iIP);
-	}
-	virtual void setFrom(const XParam &iIP)
-	{
-		from.set(iIP);
-	}
-	virtual void setTo(const XParam &iIP)
-	{
-		to.set(iIP);
-	}
-	virtual void setAddressFrom(const string &iIP)
-	{
-		from.setAddress(iIP);
-	}
-	virtual void setAddressTo(const string &iIP)
-	{
-		to.setAddress(iIP);
-	}
-	virtual void setNetmaskFrom(const unsigned int &iNetmask)
-	{
-		from.setNetmask(iNetmask);
-	}
-	virtual void setNetmaskTo(const unsigned int &iNetmask)
-	{
-		to.setNetmask(iNetmask);
-	}
-	virtual void setNetmaskFrom(const string &iNetmask)
-	{
-		from.setNetmask(iNetmask);
-	}
-	virtual void setNetmaskTo(const string &iNetmask)
-	{
-		to.setNetmask(iNetmask);
-	}
-	virtual int getNetmaskFrom() const
-	{
-		return from.getNetmask();
-	}
-	virtual int getNetmaskTo() const
-	{
-		return to.getNetmask();
-	}
-	virtual string getNetmaskStringFrom() const
-	{
-		return from.getNetmaskString();
-	}
-	virtual string getNetmaskString() const
-	{
-		return to.getNetmaskString();
-	}
 protected:
 	IPxParam from;
 	IPxParam to;
