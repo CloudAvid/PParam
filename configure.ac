@@ -2,8 +2,8 @@
 
 m4_define([package_name], [pparam])
 m4_define([major_version], [1])
-m4_define([minor_version], [1])
-m4_define([micro_version], [0])
+m4_define([minor_version], [3])
+m4_define([micro_version], [1])
 m4_define([release_version], [1])
 m4_define([package_version],
 	[major_version.minor_version.micro_version])
