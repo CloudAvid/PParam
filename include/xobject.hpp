@@ -1934,11 +1934,9 @@ private:
 			if (xobj->chStatus(ObjStatus::QUERYING)) {
 				if ((*xobj == *new_obj) || 
 					(xobj->get_key() == 
-							new_obj->get_key()) ||
-					(xobj->get_name() == 
-							new_obj->get_name())) {
+							new_obj->get_key())) {
 					xobj->bkStatus();
-					throw Exception("Duplicated Object !" 
+					throw Exception("Duplicated Object !"
 							" Object name: "
 							+ new_obj->get_name(),
 							TracePoint("xobject"));
