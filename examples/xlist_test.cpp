@@ -149,7 +149,7 @@ static void* sig_handler(void *argument) {
 				}
 				cout << "<-->" << endl;
 				break;
-			}
+			
 		}
 	}
 }

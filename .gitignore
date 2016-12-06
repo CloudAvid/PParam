@@ -1,0 +1,75 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app						
+
+# XList special files
+AUTHORS
+COPYING
+ChangeLog
+INSTALL
+Makefile
+Makefile.in
+NEWS
+README
+aclocal.m4
+autom4te.cache/
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+configure
+depcomp
+examples/.deps/
+examples/.libs/
+examples/Makefile
+examples/Makefile.in
+examples/nic
+examples/servers
+examples/user
+examples/user_list
+examples/user_xlist
+examples/xlist_test
+install-sh
+libtool
+ltmain.sh
+m4/
+missing
+pparam.info
+pparam.pc
+pparam.spec
+src/.deps/
+src/.libs/
+src/Makefile
+src/Makefile.in
+stamp-h1
