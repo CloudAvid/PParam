@@ -20,8 +20,8 @@ AC_PROG_CXX
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 LT_INIT([disable-static], [enable-silent-rules])
 AC_PROG_LIBTOOL
-CXXFLAGS="-O0 -g -std=c++0x -Wall"
-CFLAGS="-O0 -g"
+CXXFLAGS="-O0 -g -std=c++0x -Wall -lpthread"
+CFLAGS="-O0 -g -lpthread"
 AC_LANG([C++])
 
 PKG_CHECK_MODULES(UUID, uuid)
