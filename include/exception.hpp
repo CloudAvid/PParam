@@ -114,9 +114,9 @@ public:
 	{
 		errno = _errno;
 	}
-	Int get_errno() const
+	long long get_errno() const
 	{
-		return errno;
+		return (long long)errno;
 	}
 	void set_description(const char *description)
 	{
@@ -138,17 +138,17 @@ public:
 	{
 		mid = _mid;
 	}
-	Int get_mid() const
+	long long get_mid() const
 	{
-		return mid;
+		return (long long)mid;
 	}
 	void set_aid(Int _aid)
 	{
 		aid = _aid;
 	}
-	Int get_aid() const
+	long long get_aid() const
 	{
-		return aid;
+		return (long long)aid;
 	}
 	bool is_failed() const
 	{
