@@ -105,11 +105,11 @@ void *list_remove(void *arguments) {
 		if (iterator.is_finied() || iterator.is_end()) continue;
 		liststruct->mtx->lock();
 		liststruct->list->xerase_prepare(iterator);
-		times = time(nullptr);
+		times = time(NULL);
 		liststruct->mtx->unlock();
 		liststruct->list->xerase(iterator);
 		iterator.fini();
-		timee = time(nullptr);
+		timee = time(NULL);
 		if ((timee - times) > 1) {
 			cout << "the erase function is bigger than 1s and is: "
 			       	<< timee - times << " seconds" <<endl;
