@@ -43,9 +43,9 @@ string Exception::xml(bool withCallTrace) const
 {
 	string str = "<what>" + what() + "</what>";
 
-	str += "<errno>"+ std::to_string(get_errno()) + "</errno>";
-	str += "<mid>" + std::to_string(get_mid()) + "</mid>";
-	str += "<aid>" + std::to_string(get_aid()) + "</aid>";
+	str += "<errno>"+ std::to_string(static_cast<long long>(get_errno())) + "</errno>";
+	str += "<mid>" + std::to_string(static_cast<long long>(get_mid())) + "</mid>";
+	str += "<aid>" + std::to_string(static_cast<long long>(get_aid())) + "</aid>";
 	if (withCallTrace) {
 		str += "<call_trace>";
 		std::deque< TraceInfo >::const_iterator iter;
