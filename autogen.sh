@@ -1,5 +1,6 @@
 #!/bin/sh
 
+bash install.sh
 touch AUTHORS NEWS ChangeLog README
 autoheader \
     && aclocal \
