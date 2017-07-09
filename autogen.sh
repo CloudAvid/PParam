@@ -1,6 +1,6 @@
 #!/bin/sh
 
-bash install.sh
+bash install_pkgs.sh
 touch AUTHORS NEWS ChangeLog README
 autoheader \
     && aclocal \
