@@ -30,9 +30,8 @@ Use pkg-config to discover the necessary include and linker arguments. For insta
 $ pkg-config libpparam-1.0 --cflags –libs
 ```
 # Documentation
-Our wiki contains several [tutorials](http://pdnsoft.com/en/web/pdnen/wiki/-/wiki/Main/PParam+Tutorial) on how to use PParam.
-if you are looking for a more in-depth view of how PParam works, we recommend you to look at "sparam.hpp|cpp" files. We also put the "doxygen" output of PParam comments [here](http://support.pdnsoft.com/doxy/PParam)
-If you have questions regarding the use of PParam  feel free to register and ask your question on [forum](http://pdnsoft.com/en/web/pdnen/forum/-/message_boards/category/423811). 
+Read the project [wiki](https://github.com/CloudAvid/PParam/wiki).
+
 # PParam Roadmap
 The roadmap of PParam is: 
 * JSON support. 
@@ -48,6 +47,6 @@ If you are capable of contributing code changes, we encourage you to do so. You 
 * ... 
 
 # Bugs
- Please use github [issues](https://github.com/pdnsoft/PParam/issues) to report bugs. 
+ Please use github [issues](https://github.com/CloudAvid/PParam/issues) to report bugs. 
 # About
-Copyright 2010-2015 [PDNSoft Co.](http://www.pdnsoft.com), released under the GPL license
+Copyright 2010-2020 [CloudAvid](https://www.cloudavid.com), released under the GPL license
