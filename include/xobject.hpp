@@ -6,8 +6,8 @@
  * would be stored by XISetParam.
  * Also we want to manage all object dependencies in this xobject.
  * 
- * Copyright 2012 PDNSoft Co. (www.pdnsoft.com)
- * \author hamid jafarian (hamid.jafarian@pdnsoft.com)
+ * Copyright 2012,2022 Cloud Avid Co. (www.cloudavid.com)
+ * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xobject is part of PParam.
  *
