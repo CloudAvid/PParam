@@ -32,15 +32,9 @@
 *.app						
 
 # XList special files
-AUTHORS
-COPYING
-ChangeLog
 compile
-INSTALL
 Makefile
 Makefile.in
-NEWS
-README
 aclocal.m4
 autom4te.cache/
 config.guess
