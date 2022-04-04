@@ -2,8 +2,8 @@
  * \file sparam.hpp
  * Defines some special parameters base on xparam.
  *
- * Copyright 2012 PDNSoft Co. (www.pdnsoft.com)
- * \author hamid jafarian (hamid.jafarian@pdnsoft.com)
+ * Copyright 2012,2022 CloudAvid Co. (www.cloudavid.com)
+ * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * sparam is part of PParam.
  *
@@ -29,6 +29,7 @@
 #include <uuid/uuid.h>
 #include <string>
 #include <ctime>
+#include <regex>
 
 #include "xparam.hpp"
 
@@ -58,49 +59,16 @@ public:
 	UUIDParam(const UUIDParam &);
 	UUIDParam(UUIDParam &&);
 	UUIDParam &operator = (const UUIDParam &);
-	XParam &operator = (const string &) throw (Exception);
-	XParam &operator = (const XParam &) throw (Exception);
+	XParam &operator = (const string &);
+	XParam &operator = (const XParam &);
 	string value() const;
+	string get_value() const;
 	void set_value(const string &_uuid)
 	{
 		*this = _uuid;
 	}
 private:
 	uuid_t uuid;
-};
-
-/**
- * \class CryptoParam
- * \author Hamed Haji Hussaini
- * \brief Definea cryptography parameter
- */
-class CryptoParam : public XTextParam
-{
-public:
-	CryptoParam(const string &name) : XTextParam(name)
-	{
-	}
-	CryptoParam(CryptoParam &&_cp) : XTextParam(std::move(_cp))
-	{ }
-	virtual XParam &operator = (const string &text)
-	{
-		val = text;
-		
-		return *this;
-	}
-	virtual XParam &operator = (const char *text)
-	{
-		val = text;
-
-		return *this;
-	}
-	void encrypt_md5()
-	{
-		*this = md5(get_value());
-	}
-
-private:
-	string md5(const string &text);
 };
 
 /**
@@ -157,7 +125,7 @@ public:
 	void set();
 	void unset();
 	virtual BoolParam &operator=(const bool &value);
-	virtual BoolParam &operator=(const XInt &value) throw (Exception);
+	virtual BoolParam &operator=(const XInt &value);
 	virtual bool operator==(const bool &value);
 	virtual bool operator==(const XInt &value);
 };
@@ -171,22 +139,12 @@ public:
 class DateParam : public XSingleParam
 {
 public:
-	DateParam(const string &name) : XSingleParam(name)
-	{
-		year = month = day = 0;
-	}
-	DateParam(const DateParam &date) : XSingleParam(date.get_pname())
-	{
-		year = date.year;
-		month = date.month;
-		day = date.day;
-	}
-	DateParam(DateParam &&_dp) : XSingleParam(std::move(_dp)),
-		year(_dp.year), month(_dp.month), day(_dp.day)
-	{ }
-	DateParam &operator = (const DateParam &) throw (Exception);
-	XParam &operator = (const string &) throw (Exception);
-	XParam &operator = (const XParam &) throw (Exception);
+	DateParam(const string &name);
+	DateParam(const DateParam &date);
+	DateParam(DateParam &&_dp);
+	DateParam &operator = (const DateParam &);
+	XParam &operator = (const string &);
+	XParam &operator = (const XParam &);
 	bool operator < (const DateParam &);
 	bool operator == (const DateParam &);
 	bool operator != (const DateParam &);
@@ -194,48 +152,33 @@ public:
 	bool operator >= (const DateParam &);
 	bool operator <= (const DateParam &);
 	DateParam operator + (const DateParam &);
+	/**
+	 * Calculates difference of two dates in days
+	 */
 	long operator - (DateParam &);
-	unsigned short get_year() const
-	{
-		return year;
-	}
-	void set_year(unsigned short _year)
-	{
-		year = _year;
-	}
-	unsigned short get_month() const
-	{
-		return month;
-	}
-	void set_month(unsigned short _month)
-	{
-		month = _month;
-	}
-	unsigned short get_day() const
-	{
-		return day;
-	}
-	void set_day(unsigned short _day)
-	{
-		day = _day;
-	}
+	unsigned short get_year() const;
+	void set_year(unsigned short _year);
+	unsigned short get_month() const;
+	void set_month(unsigned short _month);
+	unsigned short get_day() const;
+	void set_day(unsigned short _day);
 	unsigned short get_weekday();
 	void get_date(unsigned short &,unsigned short &,unsigned short &) const;
 	void set_date(unsigned short,unsigned short,unsigned short);
 	bool isValid();
 	string value() const;
-	virtual void reset()
-	{
-		year = month = day = 0;
-	}
+	virtual void reset();
 	string formattedValue(const string format) const;
+	std::string isoFormat() const;
 	void now();
 	unsigned char daysOfMonth() const;
-
-private:
 	bool isLeapYear() const;
 	unsigned short daysOfYear() const;
-	unsigned long daysOfDate();
+	unsigned long daysOfDate() const;
+	void addDay(unsigned int _day);
+private:
+	bool isLeapYear(const XUShort _year) const;
+	XUByte daysOfMonth(const XUShort _month) const;
 
 private:
 	unsigned short	year;
@@ -255,9 +198,9 @@ public:
 	TimeParam(const string &name);
 	TimeParam(const TimeParam &time);
 	TimeParam(TimeParam &&_tp);
-	TimeParam &operator = (const TimeParam &) throw (Exception);
-	XParam &operator = (const string &) throw (Exception);
-	XParam &operator = (const XParam &) throw (Exception);
+	TimeParam &operator = (const TimeParam &);
+	XParam &operator = (const string &);
+	XParam &operator = (const XParam &);
 	bool operator < (const TimeParam &);
 	bool operator == (const TimeParam &);
 	bool operator != (const TimeParam &);
@@ -282,6 +225,7 @@ public:
 	void now();
 	/** \return Returns the number of seconds passed from midnight */
 	unsigned long secondsOfTime() const;
+	unsigned int addMinute(unsigned int _minute);
 
 private:
 	unsigned short	hour;
@@ -295,104 +239,52 @@ private:
  * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
  * ]\brief Defines Date & Time parameter
  */
-class DateTime: public XSingleParam
+class DateTime : public XSingleParam
 {
 public:
-	DateTime(const string &name) :
-		XSingleParam(name), date("date"), time("time")
-	{
-
-	}
-	DateTime(DateTime &&_dt) : XSingleParam(std::move(_dt)),
-			date(std::move(_dt.date)), time(std::move(_dt.time))
-	{ }
-	DateParam &get_date()
-	{
-		return date;
-	}
-	void set_date(DateParam &_date)
-	{
-		date = _date;
-	}
-	unsigned short get_year() const
-	{
-		return date.get_year();
-	}
-	void set_year(unsigned short year)
-	{
-		date.set_year(year);
-	}
-	unsigned short get_month() const
-	{
-		return date.get_month();
-	}
-	void set_month(unsigned short month)
-	{
-		date.set_month(month);
-	}
-	unsigned short get_day() const
-	{
-		return date.get_day();
-	}
-	void set_day(unsigned short day)
-	{
-		date.set_day(day);
-	}
-	unsigned short get_weekday()
-	{
-		return date.get_weekday();
-	}
-	TimeParam &get_time()
-	{
-		return time;
-	}
-	void set_time(TimeParam &_time)
-	{
-		time = _time;
-	}
-	unsigned short get_hour() const
-	{
-		return time.get_hour();
-	}
-	void set_hour(unsigned short hour)
-	{
-		time.set_hour(hour);
-	}
-	unsigned short get_minute() const
-	{
-		return time.get_minute();
-	}
-	void set_minute(unsigned short minute)
-	{
-		time.set_minute(minute);
-	}
-	unsigned int get_second() const
-	{
-		return time.get_second();
-	}
-	void set_second(unsigned int second)
-	{
-		time.set_second(second);
-	}
+	DateTime(const string &name);
+	DateTime(const DateTime& dateTime);
+	DateTime(DateTime &&_dt);
+	DateParam &get_date();
+	void set_date(DateParam &_date);
+	unsigned short get_year() const;
+	void set_year(unsigned short year);
+	unsigned short get_month() const;
+	void set_month(unsigned short month);
+	unsigned short get_day() const;
+	void set_day(unsigned short day);
+	unsigned short get_weekday();
+	TimeParam &get_time();
+	void set_time(TimeParam &_time);
+	unsigned short get_hour() const;
+	void set_hour(unsigned short hour);
+	unsigned short get_minute() const;
+	void set_minute(unsigned short minute);
+	unsigned int get_second() const;
+	void set_second(unsigned int second);
 	XParam &operator = (const string &strdate);
 	XParam &operator = (const XParam &idate);
 	XParam &operator = (DateTime &idate);
 	bool operator < (DateTime &dateTime);
 	bool operator > (DateTime &dateTime);
+	/**
+	 * Calculates difference between two date/time
+	 * \return Returns difference between date/time in seconds
+	 */
+	XULong operator - (DateTime& dateTime);
 	bool isValid();
 	virtual string value() const;
-	virtual void reset()
-	{
-		date.reset();
-		time.reset();
-	}
+	pparam::XULong getInSeconds() const;
+	virtual void reset();
 	string formattedValue(const string dateFormat,const string timeFormat,
 				const char separator = 'T') const;
+	std::string isoFormat() const;
 	/**
 	 * Set this parameter to current date/time.
 	 */
 	void now();
 	DBFieldTypes getDataType() const { return DBDATETIME; }
+	void addMinute(unsigned int _minute);
 private:
 	DateParam date;
 	TimeParam time;
@@ -431,8 +323,8 @@ public:
 		set_pname(parentName);
 		version = _version;
 	}
-	IPParam *newT() throw (Exception);
-	virtual XParam &operator = (const XmlNode *node) throw (Exception);
+	IPParam *newT();
+	virtual XParam &operator = (const XmlNode *node);
 	
 private:
 	Version	version;
@@ -443,7 +335,7 @@ private:
  * \brief Peresent an IP address
  * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
  *
- * This class reperesent IP (Internet Protocol) address.
+ * This class represent IP (Internet Protocol) address.
  * currently, its only a base for IPv4Param and IPv6Param classes.
  */
 class IPParam: public XSingleParam
@@ -725,7 +617,7 @@ public:
 	 * Set IP address of this instance using another IPv4 object.
 	 * IP and Netmask will be copied.
 	 */
-	void set(const IPv4Param &iIP) throw (Exception);
+	void set(const IPv4Param &iIP);
 	/**
 	 * Set IP part of Address using a 32-bit number
 	 */
@@ -739,12 +631,12 @@ public:
 	 * "192.168.0.1/255.255.255.0"
 	 * "3232235521/4294967040
 	 */
-	void set(const string &iIP) throw (Exception);
+	void set(const string &iIP);
 	/**
 	 * Set IP address of this instance using a XParam object.
 	 * IP and Netmask will be copied.
 	 */
-	void set(const XParam &iIP) throw (Exception);
+	void set(const XParam &iIP);
 	/**
 	 * set IP address and netmask.
 	 * set IP useing seprated numeric parts and netmask
@@ -775,13 +667,12 @@ public:
 	 * a 32 bit number.
 	 * \param [in] iIP the string that cotains IP address
 	 */
-	void setAddress(const string &iIP) throw (Exception);
+	void setAddress(const string &iIP);
 	/**
 	 * set only IP Address using its numeric parts.
 	 * \param [in] part1,part2,part3,part4 parts of IP
 	 */
-	void setAddress(int part1, int part2, int part3, int part4)
-		throw (Exception);
+	void setAddress(int part1, int part2, int part3, int part4);
 	/**
 	 * get only IP Address part of this address
 	 * \return return IP address in a string
@@ -801,7 +692,7 @@ public:
 	 * set only Netmask.
 	 * \param [in] iIP netmask in simple form. in range of 0 - 32 .
 	 */
-	void setNetmask(const unsigned int &iIP) throw (Exception);
+	void setNetmask(const unsigned int &iIP);
 	/**
 	 * set Netmask part of Address using a String.
 	 * given string can be in one of these forms :
@@ -810,13 +701,12 @@ public:
 	 * - 0~32
 	 * \param iIP [in] String that reperesent an Netmask
 	 */
-	void setNetmask(const string &iIP) throw (Exception);
+	void setNetmask(const string &iIP);
 	/**
 	 * set only Netmask using its numeric parts.
 	 * \param [in] part1,part2,part3,part4 parts of Netmask
 	 */
-	void setNetmask(int part1, int part2, int part3, int part4)
-		throw (Exception);
+	void setNetmask(int part1, int part2, int part3, int part4);
 	/**
 	 * get Netmask part
 	 * \return returns Netmask in simple form (0-32), 32 if theres
@@ -941,13 +831,13 @@ public:
 	 * Set IP address of this instance using another IPv6 object.
 	 * IP and Netmask will be copied.
 	 */
-	void set(const IPv6Param &iIP) throw (Exception);
+	void set(const IPv6Param &iIP);
 	/**
 	 * Set IP address of this instance using an IPv4 object
 	 * by Stateless IP/ICMP Translation method.
 	 * IP and Netmask will be copied.
 	 */
-	void set(const IPv4Param &iIP) throw (Exception);
+	void set(const IPv4Param &iIP);
 	/**
 	 * Set IP address using a string.
 	 * input string must be in standard format, for example :
@@ -958,12 +848,12 @@ public:
 	 * "fe80::a0::502/64"
 	 * or a valid IPv4 string
 	 */
-	void set(const string &iIP) throw (Exception);
+	void set(const string &iIP);
 	/**
 	 * Set IP address of this instance using a XParam object.
 	 * name, IP and Netmask will be copied.
 	 */
-	void set(const XParam &iIP) throw (Exception);
+	void set(const XParam &iIP);
 	/**
 	 * set IP address and netmask.
 	 * set IP useing seprated numeric parts and netmask
@@ -977,13 +867,13 @@ public:
 	 * input string can be in standard format of IPv6
 	 * \param [in] iIP the string that cotains IP address
 	 */
-	void setAddress(const string &iIP) throw (Exception);
+	void setAddress(const string &iIP);
 	/**
 	 * set only IP Address using its numeric parts.
 	 * \param [in] part1,part2,part3,part4,part5,part6 parts of IP
 	 */
 	void setAddress(int part1, int part2, int part3, int part4, int part5,
-		int part6, int part7, int part8) throw (Exception);
+		int part6, int part7, int part8);
 	/**
 	 * get only IP Address part of this address
 	 * \return return IP address in a string
@@ -1003,13 +893,13 @@ public:
 	 * set only Netmask.
 	 * \param [in] iNetmask Netmask of address. in range of 0 - 128 .
 	 */
-	void setNetmask(const unsigned int &iNetmask) throw (Exception);
+	void setNetmask(const unsigned int &iNetmask);
 	/**
 	 * set Netmask part of Address using a String.
 	 * given string must be a number between 0 and 128
 	 * \param iIP [in] String that reperesent an Netmask
 	 */
-	void setNetmask(const string &iNetmask) throw (Exception);
+	void setNetmask(const string &iNetmask);
 	/**
 	 * get Netmask part
 	 * \return returns Netmask as a number (0-128), 128 if theres
@@ -1145,7 +1035,7 @@ public:
 	 * An exception will be thrown, if either "from" part was not set or
 	 * version of given IP address is different with "from" part
 	 */
-	virtual void setTo(const string &iIP) throw (Exception);
+	virtual void setTo(const string &iIP);
 	virtual void setFrom(const XParam &iIP);
 	virtual void setTo(const XParam &iIP);
 	/**
@@ -1358,10 +1248,10 @@ public:
 
 		return true;
 	}
-	PortParam &operator = (const PortParam &) throw (Exception);
-	XParam &operator = (const unsigned int) throw (Exception);
-	XParam &operator = (const string &) throw (Exception);
-	XParam &operator = (const XParam &) throw (Exception);
+	PortParam &operator = (const PortParam &);
+	XParam &operator = (const unsigned int);
+	XParam &operator = (const string &);
+	XParam &operator = (const XParam &);
 	bool isPortRange()
 	{
 		return portRange;
@@ -1492,8 +1382,8 @@ public:
 	{
 		return value();
 	}
-	virtual XParam &operator = (const string &mac) throw (Exception);
-	virtual XParam &operator = (const char *mac) throw (Exception);
+	virtual XParam &operator = (const string &mac);
+	virtual XParam &operator = (const char *mac);
 protected:
 	bool macIsValid(const string &mac);
 };
@@ -1530,7 +1420,7 @@ public:
 	{ 
 		addParam(&type);
 	}
-	void set_type(int x) throw (Exception)
+	void set_type(int x)
 	{
 		type.set_value(x);
 	}
@@ -1538,9 +1428,9 @@ public:
 	{
 		return type.get_value();
 	}
-	DBEngineParam *newT() throw (Exception);
+	DBEngineParam *newT();
 	XParam *getTypeParam() { return &type; }
-	virtual XParam &operator = (const XmlNode *node) throw (Exception);
+	virtual XParam &operator = (const XmlNode *node);
 protected:
 	XEnumParam<DBEngineTypes> type;
 };
@@ -1570,7 +1460,7 @@ public:
 		addParam(dbetype.getTypeParam());
 		_dep.dbe = NULL;
 	}
-	DBEngineParam &operator =(const DBEngineParam &dbe) throw (Exception)
+	DBEngineParam &operator =(const DBEngineParam &dbe)
 	{
 		this->dbe=dbe.dbe;
 		dbetype.set_type(dbe.dbetype.get_type());
@@ -1582,7 +1472,7 @@ public:
 		setConnectionString(str);
 		return *this;
 	}
-	virtual XParam &operator =(const XParam &xp) throw (Exception)
+	virtual XParam &operator =(const XParam &xp)
 	{
 		const DBEngineParam* xtp =
 			dynamic_cast<const DBEngineParam*>(&xp);
@@ -1629,7 +1519,7 @@ public:
 	{
 		dbe = xdb;
 	}
-	virtual void Connect() throw (Exception)
+	virtual void Connect()
 	{
 		if (connectionstring.empty())
 			throw Exception("connectionstring is empty !",
@@ -1694,7 +1584,7 @@ public:
 	{
 		return (XDBEngine*)sqlitedb;
 	}
-	void DBEngine(XDBEngine *xdb) throw (Exception)
+	void DBEngine(XDBEngine *xdb)
 	{
 		SQLiteDBEngine *sqlitedb = dynamic_cast<SQLiteDBEngine*>(xdb);
 		if (sqlitedb == NULL)
@@ -1711,5 +1601,121 @@ protected:
 	SQLiteDBEngine *sqlitedb;
 };
 
-} // namespace pparam
+/**
+ * \class EmailParam
+ * \author Seyed Alireza Kahduyi(alireza.kahduyi@pdnsoft.com)
+ * Defines Email Data Type.
+ */
+class EmailParam: public XTextParam
+{
+public:
+	EmailParam(const string &_pname);
+	EmailParam(EmailParam &&_ep);
+	void set_value(const string &email);
+	void set_value(const char *email);
+	string get_value() { return this->emailVal; }
+	const char *c_str() { return this->emailVal.c_str(); }
+	EmailParam &operator = (const EmailParam &_ep);
+	virtual XParam &operator = (const string &strEmail);
+	virtual XParam &operator = (const char *strEmail);
+	virtual XParam &operator = (const XParam &_ep);
+	virtual string value() const { return this->emailVal; }
+	virtual void reset() { this->emailVal = ""; }
+	bool empty() { return this->emailVal.empty(); }
+	virtual ~EmailParam() {}
+
+protected:
+	bool isValidEmail(string email);
+private:
+	string emailVal;
+
+};
+
+/**
+ * \class SIDParam
+ * \author Mahdi Parsaeian(parsa@cloudavid.com)
+ * Defines SID parameter.
+ *
+ * There are 4 formats for SID :
+ * 1.String  2.Hexadeciaml  3.Decimal  4.Binary
+ * But this class supports two of them for now: String & Hexadecimal
+ *
+ * String format is like this:
+ * 	S-1-5-21-3623811015-3361044348-30300820-1013
+ *
+ * Hexadecimal format is like this:
+ *	010500000000000515000000C7F7FED77C7755C8945ACE01F5030000
+ */
+class SIDParam: public XSingleParam
+{
+public:
+	/**
+	 * \class SIDParam::ConvertSID
+	 * \author Mahdi Parsaeian
+	 *
+	 * Contains functions for converting SID formats to each other.
+	 */
+	class ConvertSID
+	{
+	public:
+		static string hexToStr(const string &hexSID);
+		static string strToHex(const string &strSID);
+	protected:
+		/**
+		 * "nextPartOfSID" put a subID in "part" from "sid"
+		 * and increase "currentIndex" as subID length.
+		 */
+		static void nextPartOfSID(const string &sid, string &part,
+						int &currentIndex, int len);
+		static long int hexToDecimal(const string &hexVal);
+		/**
+		 * "toBigOrLittleEndian" converts "src"
+		 * from little endian to big endain format or
+		 * from big endian to little endian format
+		 * and put it in "dst".
+		 */
+		static void toBigOrLittleEndian(const string &src, string &dst);
+		static void split(string src,char splitter,vector<string> &dst);
+		static string decimalToHex (const string &decimal, int len);
+	};
+	enum Type{
+		STRING,	// use for SID string format.
+		HEX	// use for SID hexadecimal format.
+	};
+	SIDParam(const string &pname);
+	SIDParam(const SIDParam &);
+	/**
+	 * "reset" empties sid value.
+	 */
+	void reset();
+	SIDParam &operator = (const SIDParam &);
+	XParam &operator = (const string &);
+	XParam &operator = (const XParam &);
+	/**
+	 * By default "value" returns string SID.
+	 * This function & "get_value" & "get_value_str" are exactly the same!
+	 */
+	string value() const;
+	string get_value() const ;
+	string get_value_str() const;
+	/**
+	 * "get_value" returns hex SID.
+	 */
+	string get_value_hex() const;
+	/**
+	 * "set_value" can get all SID formats as input parameter.
+	 */
+	void set_value(const string &_sid);
+	virtual ~SIDParam();
+
+protected:
+	/**
+	 * "wichFormat" check input "sid" and declare it's format.
+	 */
+	Type wichFormat(const string &_sid);
+private:
+	string sid;
+};
+
+};// end of namespace pparam
 #endif //_PDN_SPARAM_HPP_
