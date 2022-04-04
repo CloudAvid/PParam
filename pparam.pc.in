@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: Common parameter structures for managing/manipulating XMLs
 URL: http://www.pdnsoft.com
-Requires: libxml++-2.6 uuid openssl
+Requires: libxml-2.0 uuid openssl
 Version: @PACKAGE_VERSION@
 Libs: -lpparam
 Cflags: -I${includedir}/pvm

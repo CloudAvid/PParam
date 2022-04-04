@@ -1,4 +1,6 @@
-SUBDIRS = src examples
+ACLOCAL_AMFLAGS = -I m4
+
+SUBDIRS = src
 EXTRA_DIST = autogen.sh
 
 pkgconfigdir= $(libdir)/pkgconfig
@@ -8,7 +10,6 @@ RPM_TOPDIR=`rpm --showrc | perl -n -e 'print if(s/.*_topdir\s+(.*)/$$1/)'`
 
 rpm:
 	$(MAKE) distdir ; 
-	cp examples/*.hpp $(PACKAGE)-$(VERSION)/examples/ ; 
 	mv $(PACKAGE)-$(VERSION) $(PACKAGE_TARNAME) ; 
 	tar czvf $(PACKAGE_TARNAME).tgz $(PACKAGE_TARNAME) ; 
 	$(RM) -rf $(PACKAGE_TARNAME) ; 
@@ -19,9 +20,10 @@ rpm:
 	mkdir -p $(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_TARNAME) ; 
 	mv $(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_RPMNAME)-*$(PACKAGE_RPMVERSION)-*.rpm \
 		$(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_TARNAME) ;
+	expect -c " spawn  bash -c \"rpm --resign $(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_TARNAME)/*\" ;  expect \"phrase: \"; send \"$(RPM_PASSPHRASE)\r\";  expect eof";
 
 install_rpm:
-	sudo rpm -i --nodeps --force $(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_TARNAME)/*.rpm
+	sudo rpm -iv --force --nodeps $(RPM_TOPDIR)/RPMS/x86_64/$(PACKAGE_TARNAME)/*.rpm
 
 uninstall_rpm:
 	sudo rpm -e `rpm -qa | grep $(PACKAGE_RPMNAME)`

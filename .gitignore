@@ -35,6 +35,7 @@
 AUTHORS
 COPYING
 ChangeLog
+compile
 INSTALL
 Makefile
 Makefile.in
@@ -72,4 +73,5 @@ src/.deps/
 src/.libs/
 src/Makefile
 src/Makefile.in
+examples/
 stamp-h1

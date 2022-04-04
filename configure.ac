@@ -2,16 +2,16 @@
 
 m4_define([package_name], [pparam])
 m4_define([major_version], [1])
-m4_define([minor_version], [3])
+m4_define([minor_version], [9])
 m4_define([micro_version], [1])
 m4_define([release_version], [1])
 m4_define([package_version],
 	[major_version.minor_version.micro_version])
 
 AC_PREREQ([2.63])
-AC_INIT([package_name], [package_version], [package_name@pdnsoft.com])
+AC_INIT([package_name], [package_version], [package_name@cloudavid.com])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR(src/, examples/)
+AC_CONFIG_SRCDIR(src/)
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE
@@ -20,14 +20,13 @@ AC_PROG_CXX
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 LT_INIT([disable-static], [enable-silent-rules])
 AC_PROG_LIBTOOL
-CXXFLAGS="-O0 -g -std=c++0x -Wall -lpthread"
-CFLAGS="-O0 -g -lpthread"
+CXXFLAGS="-O0 -g -std=c++17 -Wall -fPIC"
+CFLAGS="-O0 -g"
 AC_LANG([C++])
 
 PKG_CHECK_MODULES(UUID, uuid)
-PKG_CHECK_MODULES([LIBXMLXX], [libxml++-2.6])
+PKG_CHECK_MODULES([LIBXML2], [libxml-2.0])
 PKG_CHECK_MODULES([OPENSSL], [openssl])
-PKG_CHECK_MODULES([GLIBMM], [glibmm-2.4])
 PKG_CHECK_MODULES(SQLITE3, sqlite3)
 
 AC_CHECK_LIB([uuid], [uuid_parse])
@@ -74,7 +73,6 @@ includedir=${prefix}/include
 
 AC_OUTPUT(Makefile
 	src/Makefile
-	examples/Makefile
 	package_name.pc
 	package_name.spec
 	package_name.info
