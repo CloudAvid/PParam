@@ -1,8 +1,9 @@
 /**
  * @file exception.hpp
  *
- * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
- * @author hamid jafaian (hamid.jafarian@pdnsoft.com)
+ * Copyright 2010,2022 CloudAvid. (www.cloudavid.com)
+ * @author hamid jafaian (hamid.jafarian@cloudavid.com)
+ * @author Hamed Haji Hussuaini (hajihussaini@cloudavid.com)
  *
  * exception is part of PParam.
  *
@@ -19,8 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _PDN_EXCEPTION_HPP_
-#define _PDN_EXCEPTION_HPP_
+#pragma once
 
 #include "logs.hpp"
 
@@ -74,10 +74,15 @@ public:
 	};
 
 	Exception(const string &des, const TraceInfo &tInfo);
-	Exception(exStatus _status,const string &des, const TraceInfo &tInfo);
-	Exception(Int _mid, Int _aid, Int _errno, 
-			Exception::exStatus _status,
-			const string &des, const TraceInfo &tInfo);
+	Exception(const exStatus _status,
+		const string &des,
+		const TraceInfo &tInfo
+		);
+	Exception(const std::string module,
+		const Int _err,
+		const string &des,
+		const TraceInfo &tInfo
+		);
 
 	virtual string what() const;
 	/**
@@ -102,96 +107,37 @@ public:
 	 * This function may be called in catch blocks.
 	 */
 	void addTracePoint(const TraceInfo &tInfo);
-	void set_status(exStatus _status)
-	{
-		status = _status;
-	}
-	exStatus get_status() const
-	{
-		return status;
-	}
-	void set_errno(Int _errno)
-	{
-		errno = _errno;
-	}
-	Int get_errno() const
-	{
-		return errno;
-	}
-	void set_description(const char *description)
-	{
-		excDesc.assign(description);
-	}
-	void set_description(const string &description)
-	{
-		excDesc = description;
-	}
-	void set_nokDesc(const string &_nokDesc)
-	{
-		nokDesc = _nokDesc;
-	}
-	string get_nokDesc() const
-	{
-		return nokDesc;
-	}
-	void set_mid(Int _mid)
-	{
-		mid = _mid;
-	}
-	Int get_mid() const
-	{
-		return mid;
-	}
-	void set_aid(Int _aid)
-	{
-		aid = _aid;
-	}
-	Int get_aid() const
-	{
-		return aid;
-	}
-	bool is_failed() const
-	{
-		return status == FAILED;
-	}
-	bool is_nok() const
-	{
-		return status == NOK;
-	}
-	void failed()
-	{
-		status = FAILED;
-	}
-	void nok() 
-	{
-		status = NOK;
-	}
+	void set_status(exStatus _status);
+	exStatus get_status() const;;
+	std::string get_module() const;
+	void set_errno(Int _err);
+	Int get_errno() const;
+	void set_description(const char *description);
+	void set_description(const string &description);
+	void set_nokDesc(const string &_nokDesc);
+	string get_nokDesc() const;
+	bool is_failed() const;
+	bool is_nok() const;
+	void failed();
+	void nok() ;
+
 private:
-	/**
-	 * Stores funcations call sequence, from exception generator to
-	 * the outer caller function.
-	 */
-	std::deque<TraceInfo> callSequence;
-	/**
-	 * Description for throwed exception.
-	 */
-	string excDesc;
 	/**
 	 * Exception status.
 	 */
 	exStatus status;
 	/**
+	 * Name of module that throws this exception.
+	 */
+	std::string module;
+	/**
 	 * Error number of this exception.
 	 */
 	Int err;
 	/**
-	 * ID of submodule that throws this exception.
+	 * Description for throwed exception.
 	 */
-	Int mid;
-	/**
-	 * ID of action in submodule that throws this exception.
-	 */
-	Int aid;
+	string excDesc;
 	/**
 	 * Description about nok status.
 	 *
@@ -199,8 +145,11 @@ private:
 	 * to exception catcher, use this.
 	 */
 	string nokDesc;
+	/**
+	 * Stores funcations call sequence, from exception generator to
+	 * the outer caller function.
+	 */
+	std::deque<TraceInfo> callSequence;
 };
 
 } //namespace pparam
-
-#endif

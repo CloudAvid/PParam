@@ -9,28 +9,35 @@ using std::stringstream;
 namespace pparam
 {
 
-Exception::Exception(const string &des, const TraceInfo &tInfo) : excDesc(des)
+Exception::Exception(const string &des, const TraceInfo &tInfo) :
+	excDesc(des)
 {
-	callSequence.push_front(tInfo);
 	status = FAILED;
-	mid = aid = err = -1;
+	err = -1;
+	callSequence.push_front(tInfo);
 }
 
-Exception::Exception(exStatus _status,const string &des, const TraceInfo &tInfo)
-		: excDesc(des), status(_status)
+Exception::Exception(const exStatus _status,
+		const string &des,
+		const TraceInfo &tInfo
+		) :
+	status(_status),
+	excDesc(des)
 {
 	callSequence.push_front(tInfo);
-	mid = aid = err = -1;
+	err = -1;
 }
 
-Exception::Exception(Exception::Int _mid, Exception::Int _aid, 
-			Exception::Int _err, Exception::exStatus _status,
-			const string &des, const TraceInfo &tInfo) : 
-			excDesc(des),
-			status(_status),
-			err(_err),
-			mid(_mid), aid(_aid)
+Exception::Exception(const std::string module, 
+		const Exception::Int _err,
+		const string &des,
+		const TraceInfo &tInfo
+		) :
+	module(module),
+	err(_err),
+	excDesc(des)
 {
+	status = FAILED;
 	callSequence.push_front(tInfo);
 }
 
@@ -41,31 +48,32 @@ string Exception::what() const
 
 string Exception::xml(bool withCallTrace) const
 {
-	string str = "<what>" + what() + "</what>";
+	std::ostringstream oss;
+	std::deque< TraceInfo >::const_iterator iter;
 
-	str += "<errno>"+ std::to_string(static_cast<long long>(get_errno())) + "</errno>";
-	str += "<mid>" + std::to_string(static_cast<long long>(get_mid())) + "</mid>";
-	str += "<aid>" + std::to_string(static_cast<long long>(get_aid())) + "</aid>";
+	oss << "<mid>" << get_module() << "</mid>";
+	oss << "<aid></aid>";
+	oss << "<errno>" << get_errno() << "</errno>";
+	oss << "<what>" << what() << "</what>";
 	if (withCallTrace) {
-		str += "<call_trace>";
-		std::deque< TraceInfo >::const_iterator iter;
-		for (iter = callSequence.begin();
-			iter != callSequence.end(); ++iter) {
-			str += "<call>";
-			str += "<system_name>" + 
-					(*iter).SubSystemName + 
-					"</system_name>";
-			str += "<function>" + 
-					(*iter).FunctionName + 
-					"</function>";
-			str += "<params>" + 
-					(*iter).FunctionParameters + 
-					"</params>";
-			str += "</call>";
+		oss << "<call_trace>";
+		for (iter = callSequence.begin(); iter != callSequence.end();
+				++iter) {
+			oss << "<call>";
+			oss << "<system_name>" 
+				<< (*iter).SubSystemName
+				<< "</system_name>";
+			oss << "<function>"
+				<<  (*iter).FunctionName
+				<< "</function>";
+			oss << "<params>"
+				<< (*iter).FunctionParameters
+				<< "</params>";
+			oss << "</call>";
 		}
-		str += "</call_trace>";
+		oss << "</call_trace>";
 	}
-	return str;
+	return oss.str();
 }
 
 void Exception::log(LogSystem &logSys, 
@@ -88,4 +96,70 @@ void Exception::addTracePoint(const TraceInfo &tInfo)
 {
 	callSequence.push_front(tInfo);
 }
+
+void Exception::set_status(exStatus _status)
+{
+	status = _status;
+}
+
+Exception::exStatus Exception::get_status() const
+{
+	return status;
+}
+
+std::string Exception::get_module() const
+{
+	return module;
+}
+
+void Exception::set_errno(Int _err)
+{
+	err = _err;
+}
+
+Exception::Int Exception::get_errno() const
+{
+	return err;
+}
+
+void Exception::set_description(const char *description)
+{
+	excDesc.assign(description);
+}
+
+void Exception::set_description(const string &description)
+{
+	excDesc = description;
+}
+
+void Exception::set_nokDesc(const string &_nokDesc)
+{
+	nokDesc = _nokDesc;
+}
+
+string Exception::get_nokDesc() const
+{
+	return nokDesc;
+}
+
+bool Exception::is_failed() const
+{
+	return status == FAILED;
+}
+
+bool Exception::is_nok() const
+{
+	return status == NOK;
+}
+
+void Exception::failed()
+{
+	status = FAILED;
+}
+
+void Exception::nok() 
+{
+	status = NOK;
+}
+
 } // namespace pparam
