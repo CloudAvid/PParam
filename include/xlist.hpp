@@ -9,8 +9,8 @@
  * node.
  * Read accesses in this list simulates by iterators on nodes.
  *
- * Copyright 2013 PDNSoft Co. (www.pdnsoft.com)
- * \author hamid jafarian (hamid.jafarian@pdnsoft.com)
+ * Copyright 2013,2022 Cloud Avid Co. (www.cloudavid.com)
+ * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xlist is part of PParam.
  *
@@ -30,7 +30,7 @@
 #define GCC_VERSION (__GNUC__ * 10000 \
 				+ __GNUC_MINOR__ * 100 \
 				+ __GNUC_PATCHLEVEL__)
-
+#include <stddef.h>
 #include <list>
 #if	GCC_VERSION > 40500 // check for GCC > 4.5
 #include <atomic>
@@ -382,26 +382,26 @@ public:
 	/**
 	 * Is this iterator finished? reached at end.
 	 */
-	bool is_finied()
+	bool is_finied() const
 	{
 		return (this->_M_node == NULL);
 	}
 	/**
 	 * Is this iterator finished? reached at end.
 	 */
-	bool is_end()
+	bool is_end() const
 	{
 		return (this->_M_node == list_end);
 	}
 	/**
 	 * Do iterates on any node?
 	 */
-	bool on_element()
+	bool on_element() const
 	{
 		return ((this->_M_node != list_end) &&
 				(this->_M_node != NULL));
 	}
-	bool on_node()
+	bool on_node() const
 	{
 		return ((this->_M_node != list_end) &&
 				(this->_M_node != NULL));
@@ -632,26 +632,26 @@ public:
 	/**
 	 * Is this iterator finished? 
 	 */
-	bool is_finied()
+	bool is_finied() const
 	{
 		return (this->_M_node == NULL);
 	}
 	/**
 	 * Is this iterator finished? reached at end.
 	 */
-	bool is_end()
+	bool is_end() const
 	{
 		return (this->_M_node == list_end);
 	}
 	/**
 	 * Do iterates on any node?
 	 */
-	bool on_element()
+	bool on_element() const
 	{
 		return ((this->_M_node != list_end) &&
 				(this->_M_node != NULL));
 	}
-	bool on_node()
+	bool on_node() const
 	{
 		return ((this->_M_node != list_end) &&
 				(this->_M_node != NULL));

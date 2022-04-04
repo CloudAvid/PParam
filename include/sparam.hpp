@@ -2,7 +2,7 @@
  * \file sparam.hpp
  * Defines some special parameters base on xparam.
  *
- * Copyright 2012,2022 CloudAvid Co. (www.cloudavid.com)
+ * Copyright 2012,2022 Cloud Avid Co. (www.cloudavid.com)
  * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * sparam is part of PParam.

@@ -1,6 +1,7 @@
-AM_CPPFLAGS= $(LIBXMLXX_CFLAGS) \
-	$(SQLITE3_CFLAGS) \
-	-I../include
+AM_CPPFLAGS= $(SQLITE3_CFLAGS) \
+	-I../include \
+	$(LIBXML2_CFLAGS) \
+	-I /usr/include/
 
 pparamincludedir = $(includedir)/pvm/pparam
 pparaminclude_HEADERS = ../include/logs.hpp \
@@ -10,7 +11,8 @@ pparaminclude_HEADERS = ../include/logs.hpp \
 		../include/xparam.hpp \
 		../include/xparam.tcc \
 		../include/xlist.hpp \
-		../include/xobject.hpp
+		../include/xobject.hpp \
+		../include/xml.hpp
 
 lib_LTLIBRARIES= libpparam.la
 libpparam_la_SOURCES= logs.cpp \
@@ -18,9 +20,12 @@ libpparam_la_SOURCES= logs.cpp \
 		xparam.cpp \
 		sparam.cpp \
 		xdbengine.cpp \
-		xobject.cpp
+		xobject.cpp \
+		xml.cpp
+
 libpparam_la_LDFLAGS= -version-info $(LIBPPARAM_SO_VERSION)
-libpparam_la_LIBADD= $(LIBXMLXX_LIBS) \
-		$(SQLITE3_LIBS) \
+libpparam_la_LIBADD= $(SQLITE3_LIBS) \
 		-lssl \
-		-lcrypto
+		-lgcrypt \
+		$(LIBXML2_LIBS)
+
