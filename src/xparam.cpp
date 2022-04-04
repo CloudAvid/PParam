@@ -1,6 +1,11 @@
 #include "xparam.hpp"
 #include <fstream>
 #include <iostream>
+#include <ctime>
+#include <openssl/sha.h>
+#include <iomanip>
+#include <syslog.h>
+#include <unistd.h>
 
 namespace pparam
 {
@@ -23,12 +28,11 @@ XParam::XParam(const string &_pname) :
 	runtime = false;
 }
 
-void XParam::loadXmlStr(string xstr, XParam::XmlParser *parser)
-	throw (Exception)
+void XParam::loadXmlStr(const string &xstr, XParam::XmlParser *parser)
 {
 	XmlParser * _parser = (parser == NULL) ? new XmlParser : parser;
 	try {
-		_parser->parse_memory(xstr.c_str());
+		_parser->parse_memory(xstr);
 		if ((*_parser)) {
 			XmlNode *node =
 				_parser->get_document()->get_root_node();
@@ -52,11 +56,11 @@ void XParam::loadXmlStr(string xstr, XParam::XmlParser *parser)
 		TracePoint("xpram"));
 }
 
-void XParam::loadXmlDoc(string xdoc, XmlParser *parser) throw (Exception)
+void XParam::loadXmlDoc(const string &xdoc, XmlParser *parser,
+			bool checksum, const string &iv)
 {
 	XmlParser *_parser = (parser == NULL) ? new XmlParser : parser;
 	try {
-		_parser->set_substitute_entities();
 		_parser->parse_file(xdoc);
 		if ((*_parser)) {
 			XmlNode *node =
@@ -81,32 +85,48 @@ void XParam::loadXmlDoc(string xdoc, XmlParser *parser) throw (Exception)
 		TracePoint("pparam"));
 }
 
-void XParam::saveXmlDoc(string xdoc, bool show_runtime, const int &indent,
-	bool with_endl) const throw (Exception)
+void XParam::saveXmlDoc(const string &xdoc, bool show_runtime,
+		const int &indent, bool with_endl,
+		bool checksum, const string &iv) const
 {
-	string sxml;
+	string addr = xdoc;
+	time_t rawtime;
+	char timestamp[30];
+	std::fstream xfile;
+
+	std::time(&rawtime);
+	strftime(timestamp, sizeof(timestamp), "%F_%T",  
+					std::localtime(&rawtime));
+	addr.append(".old_" + string(timestamp));
+	rename(xdoc.c_str(), addr.c_str());
+
+	xfile.exceptions(std::fstream::failbit | std::fstream::badbit);
 	try {
-		sxml = xml(show_runtime, indent, with_endl);
+		std::string xmlStr = xml(show_runtime, indent, with_endl);
+		xfile.open(xdoc.c_str(),
+			std::ios_base::trunc | std::ios_base::out);
+		xfile << xmlStr;
+		xfile.close();
+		sync();
+		remove(addr.c_str());
 	} catch (std::exception &e) {
+		if (xfile.is_open())
+			xfile.close();
+		rename(addr.c_str(), xdoc.c_str());
+		if ((xfile.rdstate() & std::fstream::failbit))
+			throw Exception("Can't open file to save " 
+				+ get_pname() 
+				+ " ! OR another error occurred!: " 
+				+ e.what(),
+				TracePoint("pparam"));
+		else if ((xfile.rdstate() & std::fstream::badbit))
+			throw Exception("Can't save " 
+                                + get_pname() + " to file!: " + e.what(), 
+                                TracePoint("pparam"));
 		throw Exception("Can't generate xml to save " 
 				+ get_pname() + " !: " + e.what(), 
 				TracePoint("pparam"));
 	}
-	std::fstream xfile;
-	try {
-		xfile.open(xdoc.c_str(),
-			std::ios_base::trunc | std::ios_base::out);
-	} catch (std::exception &e) {
-		throw Exception("Can't open file to save " 
-				+ get_pname() + " !: " + e.what(),
-				TracePoint("pparam"));
-	}
-	if (xfile.fail())
-		throw Exception("Can't open file to save " 
-				+ get_pname() + " !",
-				TracePoint("pparam"));
-	xfile << sxml;
-	xfile.close();
 }
 
 string XParam::xml(bool show_runtime, const int &indent, bool with_endl) const
@@ -131,7 +151,7 @@ string XParam::stripBlanks(string str)
 	return str.substr(start, end - start + 1);
 }
 
-bool XParam::is_myNode(const XmlNode *node) throw (Exception)
+bool XParam::is_myNode(const XmlNode *node)
 {
 	if (!node)
 		return false;
@@ -141,14 +161,14 @@ bool XParam::is_myNode(const XmlNode *node) throw (Exception)
 	/* verify version number */
 	if (version.empty())
 		return true;
-	xmlpp::Attribute *ver = ((xmlpp::Element *) (node))->get_attribute(
+	std::string ver = ((xml::Element *) (node))->get_attribute(
 		"ver");
-	if (!ver)
+	if (ver.empty())
 		throw Exception(
 			"There is no \"ver\" attribute in " + pname
 				+ " element", TracePoint("pparam"));
 
-	if (ver->get_value() != version)
+	if (ver != version)
 		throw Exception(
 			"Bad " + pname + " version! " + "supported version is: "
 				+ version, TracePoint("pparam"));
@@ -166,24 +186,24 @@ XSingleParam::XSingleParam(XSingleParam &&_xsp) : XParam(std::move(_xsp))
 {
 }
 
-XParam& XSingleParam::operator =(const XmlNode* node) throw (Exception)
+XParam& XSingleParam::operator =(const XmlNode* node)
 {
 	XParam* vparam = this;
 	if (!is_myNode(node))
 		return (*this);
 
-	XmlNode::NodeList nlist = node->get_children();
-	for (XmlNode::NodeList::iterator iter = nlist.begin();
+	XmlNode::const_NodeList nlist = node->get_children();
+	for (XmlNode::const_NodeList::iterator iter = nlist.begin();
 			iter != nlist.end(); ++iter) {
 		/* If node is comment, ignore it */
-		const xmlpp::CommentNode* nComment =
-			dynamic_cast<const xmlpp::CommentNode*>(*iter);
+		const xml::CommentNode* nComment =
+			dynamic_cast<const xml::CommentNode*>(*iter);
 		if (nComment)
 			continue;
 
 		/* Read text or CData nodes */
-		const xmlpp::ContentNode* nContent =
-			dynamic_cast<const xmlpp::ContentNode*>(*iter);
+		const xml::ContentNode* nContent =
+			dynamic_cast<const xml::ContentNode*>(*iter);
 		if (nContent)
 			(*vparam) = stripBlanks(nContent->get_content());
 	}
@@ -191,7 +211,7 @@ XParam& XSingleParam::operator =(const XmlNode* node) throw (Exception)
 	return (*this);
 }
 
-bool XSingleParam::operator == (const XParam &parameter) throw (Exception)
+bool XSingleParam::operator == (const XParam &parameter)
 {
 	const XSingleParam	*singleParameter =
 				dynamic_cast<const XSingleParam*>(&parameter);
@@ -207,7 +227,7 @@ bool XSingleParam::operator == (const XParam &parameter) throw (Exception)
 	return true;
 }
 
-bool XSingleParam::operator != (const XParam &parameter) throw (Exception)
+bool XSingleParam::operator != (const XParam &parameter)
 {
 	return !(*this == parameter);
 }
@@ -248,7 +268,7 @@ XTextParam &XTextParam::operator = (const XTextParam &vtp)
 
 XParam &XTextParam::operator = (const string &str)
 {
-	set_value(str);
+	set_value(str);	
 
 	return *this;
 }
@@ -260,7 +280,7 @@ XParam &XTextParam::operator = (const char *str)
 	return *this;
 }
 
-XParam &XTextParam::operator = (const XParam &xp) throw (Exception)
+XParam &XTextParam::operator = (const XParam &xp)
 {
 	const XTextParam* xtp = dynamic_cast<const XTextParam*>(&xp);
 
@@ -341,7 +361,7 @@ XFloatParam::XFloatParam(XFloatParam &&_xfp) : XSingleParam(std::move(_xfp)),
 {
 }
 
-XParam& XFloatParam::operator =(const string& str) throw (Exception)
+XParam& XFloatParam::operator =(const string& str)
 {
 	XParam::XFloat value;
 	std::istringstream iss(str);
@@ -349,7 +369,7 @@ XParam& XFloatParam::operator =(const string& str) throw (Exception)
 	return (*this) = value;
 }
 
-XParam& XFloatParam::operator =(const XParam::XFloat& value) throw (Exception)
+XParam& XFloatParam::operator =(const XParam::XFloat& value)
 {
 	if ((max >= min) /* we should check boundries. */
 	&& (value < min || value > max)) {
@@ -360,7 +380,7 @@ XParam& XFloatParam::operator =(const XParam::XFloat& value) throw (Exception)
 	return (*this);
 }
 
-XParam& XFloatParam::operator =(const XParam& xp) throw (Exception)
+XParam& XFloatParam::operator =(const XParam& xp)
 {
 	const XFloatParam* xip = dynamic_cast<const XFloatParam*>(&xp);
 	if (xip == NULL)

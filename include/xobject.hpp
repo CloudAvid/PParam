@@ -660,7 +660,7 @@ public:
 	/**
 	 * Add created object to the system.
 	 */
-	void add() throw (Exception)
+	void add()
 	{
 		if (chStatus(ObjStatus::ADDING)) {
 			try {
@@ -699,7 +699,7 @@ public:
 	/**
 	 * Delete object from system.
 	 */
-	void del() throw (Exception)
+	void del()
 	{
 		if (chStatus(ObjStatus::DELETING)) {
 			if (is_busy()) {
@@ -709,19 +709,26 @@ public:
 			}
 			try {
 				_del();
-				/* Finalize self iterator.
-				 */
-				this_iter.fini();
 			} catch (Exception &e) {
 				if (e.is_nok()) {
 					chStatus(ObjStatus::DELETED);
 					disconnectAll();
+					/* Finalize self iterator.
+					 * self iterator is used in disconnectAll,
+					 * so must fini after this function.
+					 */
+					this_iter.fini();
 				} else bkStatus();
 				e.addTracePoint(TracePoint("xobject"));
 				throw e;
 			}
 			chStatus(ObjStatus::DELETED);
 			disconnectAll();
+			/* Finalize self iterator.
+			 * self iterator is used in disconnectAll,
+			 * so must fini after this function.
+			 */
+			this_iter.fini();
 		} else {
 			throw Exception("Can't prepare object : " + get_name()
 					+ " for deleting!",
@@ -742,7 +749,7 @@ public:
 	 * Modify object attributes in systeam.
 	 * \param xo modification target object.
 	 */
-	void mod(_XObject *xo) throw (Exception)
+	void mod(_XObject *xo)
 	{
 		try {
 			_mod(xo);
@@ -774,7 +781,7 @@ public:
 	 * "reload_prepare".
 	 * \param xo target object to reload base on.
 	 */
-	void reload(_XObject *xo) throw (Exception)
+	void reload(_XObject *xo)
 	{
 		try {
 			*(XParam *)this = *(XParam *)xo;
@@ -1189,7 +1196,17 @@ protected:
 	{
 		c_iterator ret = iter;
 		++ ret;
-		cList.xerase(iter);
+		/* In cases where there is an iterator to the connection,
+		 * this function will be blocked until iterator is released.
+		 * for prevent blocking, this function will be executed in another thread.
+		 *
+		 * also we need object iterator for prevent delete object
+		 * while deleting connection in thread.
+		 */
+		auto objIter = get_this_iter();
+		std::thread([this, iter, objIter]() {
+			cList.xerase(iter);
+		}).detach();
 		return ret;
 	}
 	/**
@@ -1360,7 +1377,7 @@ public:
 	 * \param clone Do add clone of object or himself?
 	 * \return iteartor on the loaded object.
 	 */
-	iterator loadObj(_XObject *xo, bool clone = true) throw (Exception)
+	iterator loadObj(_XObject *xo, bool clone = true)
 	{
 		pthread_mutex_lock(&dup_lock);
 		try {
@@ -1395,7 +1412,7 @@ public:
 	 * \param clone Do add to list clone of this object or himself?
 	 * \return iteartor on the added object.
 	 */
-	iterator add(_XObject *xo, bool clone = true) throw (Exception)
+	iterator add(_XObject *xo, bool clone = true)
 	{
 		iterator iter;
 		try {
@@ -1415,7 +1432,9 @@ public:
 				 */
 				nxo->disconnectAll();
 				nxo->this_iter_fini();
+				wrlock();
 				list.del(iter);
+				unlock();
 			} 
 			throw e;
 		}
@@ -1426,7 +1445,7 @@ public:
 	 * \param key key of loaded object.
 	 * \return iteartor on the added object.
 	 */
-	iterator add(const string &key) throw (Exception)
+	iterator add(const string &key)
 	{
 		rdlock();
 		iterator iter = list.find(key);
@@ -1449,7 +1468,7 @@ public:
 	 * \param key key value of target object.
 	 * \return iterator on the next object of deleted object.
 	 */
-	iterator del(const string &key) throw (Exception)
+	iterator del(const string &key)
 	{
 		wrlock();
 		iterator iter = list.find(key);
@@ -1470,7 +1489,7 @@ public:
 	 * Delete object at specified location (iter).
 	 * \return iterator on the next object of deleted object.
 	 */
-	iterator del(iterator &iter) throw (Exception)
+	iterator del(iterator &iter)
 	{
 		_XObject *obj = static_cast<_XObject *>(*iter);
 		try {
@@ -1577,7 +1596,7 @@ public:
 	 * \param reload Do reload object or modify? default is false, modify.
 	 * \return iterator on the modified object.
 	 */
-	iterator mod(_XObject *xo, bool reload = false) throw (Exception)
+	iterator mod(_XObject *xo, bool reload = false)
 	{
 		rdlock();
 		iterator old_obj_iter = query(xo->get_key());
@@ -1634,6 +1653,52 @@ public:
 	}
 	/**
 	 * Query specified object.
+	 * return iterator to obj if accepted by lambda.
+	 * lambda must return true or false.
+	 * Use when you are sure about lock on list.
+	 */
+	template <typename Query>
+	iterator query(Query _query)
+	{
+		for (auto iter = begin(); iter != end(); ++iter) {
+			if (_query(iter))
+				return iter;
+		}
+		return end();
+	}
+	/**
+	 * Lock the list and query specified object.
+	 */
+	template <typename Query>
+	iterator query_lock(Query _query)
+	{
+		rdlock();
+		iterator iter = query(_query);
+		unlock();
+		return iter;
+	}
+	/**
+	 * Iterate on list and call callback for all of them.
+	 */
+	template <class T, class CallBack>
+	void iterate(CallBack callback){
+		for (auto iter = begin(); iter != end(); ++iter) {
+			callback(((T *) *iter));
+		}
+	}
+	/**
+	 * Iterate on list until callback returns true.
+	 */
+	template <class T, class CallBack>
+	bool iterate_until(CallBack callback){
+		for (auto iter = begin(); iter != end(); ++iter) {
+			if (! callback(((T *) *iter)))
+				return false;
+		}
+		return true;
+	}
+	/**
+	 * Query specified object.
 	 *
 	 * Use when you are sure about lock on list.
 	 */
@@ -1672,12 +1737,42 @@ public:
 		unlock();
 		return true;
 	}
+	iterator query_name(const std::string name)
+	{
+		iterator	objectIterator;
+
+		for (objectIterator = list.begin();
+				objectIterator != list.end();
+				++objectIterator) {
+			if (((_XObject*) *objectIterator)->get_name() == name)
+				return objectIterator;
+		}
+
+		return objectIterator;
+	}
+	iterator query_name_lock(const std::string name)
+	{
+		iterator	objectIterator;
+
+		rdlock();
+		for (objectIterator = list.begin();
+				objectIterator != list.end();
+				++objectIterator) {
+			if (((_XObject*) *objectIterator)->get_name() == name) {
+				unlock();
+
+				return objectIterator;
+			}
+		}
+		unlock();
+
+		return objectIterator;
+	}
 	/**
 	 * Load objects to the list from xml string.
 	 * \return true: objects loaded, false: loading canceled.
 	 */
 	bool loadXmlStr(string xstr, XParam::XmlParser *parser = NULL) 
-						throw (Exception)
 	{
 		if (repo->cancelLoading()) return false;
 		wrlock();
@@ -1695,14 +1790,15 @@ public:
 	 * Load objects to the list from xml document.
 	 * \return true: objects loaded, false: loading canceled.
 	 */
-	bool loadXmlDoc(string xdoc, XParam::XmlParser *parser = NULL) 
-						throw (Exception)
+	bool loadXmlDoc(string xdoc, XParam::XmlParser *parser = NULL,
+			bool checksum = true, const string &iv = "")
 	{
 		if (repo->cancelLoading()) return false;
 		wrlock();
 		set_xmlDoc(xdoc);
 		try {
-			list.loadXmlDoc(xdoc, parser);
+			list.loadXmlDoc(xdoc, parser,
+					checksum, (iv == "") ? xdoc : iv);
 		} catch(Exception &e) {
 			unlock();
 			e.addTracePoint(TracePoint("xobject"));
@@ -1738,19 +1834,20 @@ public:
 		return isOK;
 	}
 	void saveXmlDoc(const string &xdoc, bool show_runtime = false, 
-			const int &indent = 0, bool with_endl = false)
-						throw (Exception)
+			const int &indent = 0, bool with_endl = false,
+			bool checksum = true, const string &iv = "")
 	{
 		try {
-			list.saveXmlDoc(xdoc, 
-					show_runtime, indent, with_endl);
+			list.saveXmlDoc(xdoc, show_runtime,
+					indent, with_endl,
+					checksum, (iv == "") ? xdoc : iv);
 		} catch (Exception &e) {
 			unlock();
 			e.addTracePoint(TracePoint("xobject"));
 			throw e;
 		}
 	}
-	void save() throw (Exception)
+	void save()
 	{
 		if (has_xmlDoc())
 			saveXmlDoc(get_xmlDoc());
@@ -1896,7 +1993,7 @@ private:
 	/**
 	 * Prepare deletion of object.
 	 */
-	bool xdel_prepare(iterator &iter) throw(Exception)
+	bool xdel_prepare(iterator &iter)
 	{
 		bool ret;
 		wrlock();
@@ -1925,7 +2022,6 @@ private:
 	 */
 	void verifyObjectDuplication(_XObject *new_obj, 
 					_XObject *old_obj = NULL) 
-							throw (Exception)
 	{
 		for (iterator iter = list.begin();
 					iter != list.end(); ++iter) {
@@ -1977,7 +2073,7 @@ private:
 		}
 		return isOK;
 	}
-	void _add(iterator &iter) throw (Exception)
+	void _add(iterator &iter)
 	{
 		_XObject *nobj = static_cast<_XObject *>(*iter);
 		try {
@@ -2057,7 +2153,7 @@ public:
 	 * biggest to smallest.
 	 */
 	_XObjectList *regObjList(ListID listID, const string &name, 
-			_XObjectList *_xolist = NULL) throw (Exception)
+			_XObjectList *_xolist = NULL)
 	{
 		wrlock();
 		if (repo.find(listID) != repo.end()) {
@@ -2078,7 +2174,7 @@ public:
 		unlock();
 		return xolist;
 	}
-	void unregObjList(ListID listID) throw (Exception)
+	void unregObjList(ListID listID)
 	{
 		list_iterator iter;
 		wrlock();
@@ -2099,7 +2195,6 @@ public:
 	 * \return iterator on the loaded object.
 	 */
 	iterator loadObj(ListID listID, _XObject *xo, bool clone = true) 
-							throw (Exception)
 	{
 		iterator objiter;
 		rdlock();
@@ -2118,7 +2213,7 @@ public:
 	 * Reloading target object and add him to the system.
 	 * \return iterator on reloded object.
 	 */
-	iterator reloadObj(ListID listID, _XObject *xo) throw (Exception)
+	iterator reloadObj(ListID listID, _XObject *xo)
 	{
 		iterator objiter;
 		rdlock();
@@ -2141,7 +2236,6 @@ public:
 	 * \return iterator in added object.
 	 */
 	iterator add(ListID listID, _XObject *xo, bool clone = true) 
-							throw (Exception)
 	{
 		iterator objiter;
 		rdlock();
@@ -2160,7 +2254,7 @@ public:
 	 * Add loaded object.
 	 * \return iterator on added object.
 	 */
-	iterator add(ListID listID, const string &key) throw (Exception)
+	iterator add(ListID listID, const string &key)
 	{
 		iterator objiter;
 		rdlock();
@@ -2215,7 +2309,6 @@ public:
 	}
 	bool loadXmlStr(ListID listID, const string &xstr,
 			XParam::XmlParser *parser = NULL) 
-					throw (Exception)
 	{
 		bool ret;
 		rdlock();
@@ -2232,7 +2325,6 @@ public:
 	}
 	bool loadXmlDoc(ListID listID, const string &xdoc,
 			XParam::XmlParser *parser = NULL)
-						throw (Exception)
 	{
 		bool ret;
 		rdlock();
@@ -2254,7 +2346,7 @@ public:
 	 * \return true: All loaded data added, false: some objects 
 	 * 			couldn't be added.
 	 */
-	bool addLoadedObjects(ListID listID) throw (Exception)
+	bool addLoadedObjects(ListID listID)
 	{
 		bool ret;
 		rdlock();
@@ -2282,7 +2374,6 @@ public:
 	void saveXmlDoc(ListID listID, const string &xdoc, 
 			bool show_runtime = false, 
 			const int &indent = 0, bool with_endl = false)
-						throw (Exception)
 	{
 		rdlock();
 		try {
@@ -2365,7 +2456,7 @@ public:
 		}
 		unlock();
 	}
-	void save(ListID listID) throw (Exception)
+	void save(ListID listID)
 	{
 		rdlock();
 		try {
@@ -2427,7 +2518,7 @@ public:
 	/**
 	 * Unload specified list.
 	 */
-	bool unload(ListID listID) throw (Exception)
+	bool unload(ListID listID)
 	{
 		bool ret;
 		rdlock();
@@ -2446,7 +2537,6 @@ public:
 	 * Return list of object connections in "XML" format.
 	 */
 	string xml_objConnectionsList(const string &objKey) 
-							throw (Exception)
 	{
 		iterator iter;
 		if (query_lock_locklst(objKey, iter))
@@ -2455,11 +2545,87 @@ public:
 			throw Exception("Object doesn't exist",
 						TracePoint("xobject"));
 	}
+	/**
+	 * Query listID without any lock on repository.
+	 * \return iterator on found object
+	 * that accepted by query lambda.
+	 * lambda must return true or false.
+	 */
+	template <typename Query>
+	iterator query(ListID listID, Query _query)
+	{
+		try {
+			list_iterator iter = findList(listID);
+			return iter->second->query(_query);
+		} catch(Exception &e) {
+			e.addTracePoint(TracePoint("xobject"));
+			throw e;
+		}
+	}
+	/**
+	 * Query listID with read lock on repository.
+	 * \return iterator on found object
+	 * that accepted by query lambda.
+	 * lambda must return true or false.
+	 */
+	template <typename Query>
+	iterator query_lock(ListID listID, Query _query)
+	{
+		iterator ret;
+		rdlock();
+		try {
+			ret = query(listID, _query);
+		} catch(Exception &e) {
+			unlock();
+			e.addTracePoint(TracePoint("xobject"));
+			throw e;
+		}
+		unlock();
+		return ret;
+	}
+	/**
+	 * Query listID with read lock on repository & list.
+	 */
+	template <typename Query>
+	iterator query_lock_locklst(ListID listID, Query _query)
+	{
+		iterator ret;
+		rdlock();
+		try {
+			list_iterator iter = findList(listID);
+			ret = iter->second->query_lock(_query);
+		} catch(Exception &e) {
+			unlock();
+			e.addTracePoint(TracePoint("xobject"));
+			throw e;
+		}
+		unlock();
+		return ret;
+	}
+	/**
+	 * Search on whole repository.
+	 */
+	template <typename Query>
+	iterator query_lock_locklst(Query _query)
+	{
+		iterator objiter;
+		rdlock();
+		for (list_iterator iter = repo.begin(); iter != repo.end();
+								++ iter) {
+			objiter = iter->second->query_lock(_query);
+			if (objiter.on_element()) {
+				unlock();
+				return objiter;
+			}
+		}
+		unlock();
+		return objiter;
+	}
 	/** 
 	 * Query listID without any lock on repository.
 	 * \return iterator on found object.
 	 */
-	iterator query(ListID listID, const string &objkey) throw (Exception)
+	iterator query(ListID listID, const string &objkey)
 	{
 		try {
 			list_iterator iter = findList(listID);
@@ -2469,12 +2635,25 @@ public:
 			throw e;
 		}
 	}
+	iterator query_name(const ListID listID,const std::string &name)
+	{
+		list_iterator	listIterator;
+
+		try {
+			listIterator = findList(listID);
+		} catch(Exception &exception) {
+			exception.addTracePoint(TracePoint("xobject"));
+
+			throw exception;
+		}
+
+		return listIterator->second->query_name(name);
+	}
 	/** 
 	 * Query listID with read lock on repository.
 	 * \return iterator on found object.
 	 */
 	iterator query_lock(ListID listID, const string &objkey) 
-						throw (Exception)
 	{
 		iterator ret;
 		rdlock();
@@ -2488,13 +2667,29 @@ public:
 		unlock();
 		return ret;		
 	}
+	iterator query_name_lock(const ListID listID,const std::string &name) 
+	{
+		iterator	objectIterator;
+
+		rdlock();
+		try {
+			objectIterator = query_name(listID, name);
+		} catch(Exception &exception) {
+			unlock();
+			exception.addTracePoint(TracePoint("xobject"));
+
+			throw exception;
+		}
+		unlock();
+
+		return objectIterator;	
+	}
 	/** 
 	 * Query listID without any lock on repository and read lock on 
 	 * list.
 	 * \return iterator on found object.
 	 */
 	iterator query_locklst(ListID listID, const string &objkey)
-							throw (Exception)
 	{
 		try {
 			list_iterator iter = findList(listID);
@@ -2505,6 +2700,25 @@ public:
 		}
 	}
 	/** 
+	 * Query listID without any locks on repository and read lock on 
+	 * list.
+	 * \parm [in] listID List ID
+	 * \param [in] name Target object name
+	 * \return Returns iterator. On success, iterator.is_end() returns
+	 * false and iterator points to founded object, otherwise,
+	 * iterator.is_end() returns true
+	 */
+	iterator query_name_locklist(const ListID listID,
+				const std::string name
+				)
+	{
+		list_iterator	listIterator;
+
+		listIterator = findList(listID);
+
+		return listIterator->seond->query_name_lock(name);
+	}
+	/** 
 	 * Query listID with read lock on repository & list.
 	 * \param [in] objkey Key of target object to be found.
 	 * \return iterator on found object, if iterator.is_end() be true, 
@@ -2512,7 +2726,6 @@ public:
 	 * found object.
 	 */
 	iterator query_lock_locklst(ListID listID, const string &objkey)
-							throw (Exception)
 	{
 		iterator ret;
 		rdlock();
@@ -2525,6 +2738,31 @@ public:
 		}
 		unlock();
 		return ret;
+	}
+	/** 
+	 * Query listID with read lock on repository & list.
+	 * \param [in] listID List ID
+	 * \param [in] name Target object name
+	 * \return Returns iterator. On success, iterator.is_end() returns
+	 * false and iterator points to founded object, otherwise,
+	 * iterator.is_end() returns true
+	 */
+	iterator query_name_lock_locklist(const ListID listID,
+					const std::string name
+					)
+	{
+		iterator	objectIterator;
+
+		rdlock();
+		objectIterator = query_name_locklist(listID, name);
+		if (!objectIterator.is_end()) {
+			unlock();
+
+			return objectIterator;
+		}
+		unlock();
+
+		return objectIterator;
 	}
 	/**
 	 * Query hole of object repository for specified object.
@@ -2544,6 +2782,34 @@ public:
 			}
 		}
 		unlock();
+		return false;
+	}
+	/**
+	 * Query all object repositories for given object
+	 * \param [in] name Target object name
+	 * \param [out] objectIterator On success, objectIterator points to
+	 * founded object
+	 * \return On success, returns true, otherwise, returns false
+	 */
+	bool query_name_lock_locklist(const std::string name,
+				iterator &objectIterator
+				)
+	{
+		list_iterator	listIterator;
+
+		rdlock();
+		for (listIterator = repo.begin(); listIterator != repo.end();
+				++listIterator) {
+			objectIterator =
+				listIterator->second->query_name_lock(name);
+			if (!objectIterator.is_end()) {
+				unlock();
+
+				return true;
+			}
+		}
+		unlock();
+
 		return false;
 	}
 	/**
@@ -2567,6 +2833,33 @@ public:
 		}
 		unlock();
 		return objiter;
+	}
+	/**
+	 * Query all object repositories for given object.
+	 * \param [in] name Target object name
+	 * \return Returns iterator. If the object was found, iterator.is_end()
+	 * returns false and iterator points to founded object, otherwise,
+	 * it returns true.
+	 */
+	iterator query_name_lock_locklist(const std::string name)
+	{
+		iterator	objectIterator;
+		list_iterator	listIterator;
+
+		rdlock();
+		for (listIterator = repo.begin(); listIterator != repo.end();
+				++listIterator) {
+			objectIterator =
+				listIterator->second->query_name_lock(name);
+			if (!objectIterator.is_end()) {
+				unlock();
+
+				return objectIterator;
+			}
+		}
+		unlock();
+
+		return objectIterator;
 	}
 	/** 
 	 * Query objects of specified type in listID by read lock on list.
@@ -2622,7 +2915,7 @@ public:
 	 * Return iterator to the begin of the list.
 	 * \param listID ID of target list.
 	 */
-	iterator begin(ListID listID) throw (Exception)
+	iterator begin(ListID listID)
 	{
 		rdlock();
 		list_iterator iter;
@@ -2641,7 +2934,7 @@ public:
 	 * Return iterator to the end of the list.
 	 * \param listID ID of target list.
 	 */
-	iterator end(ListID listID) throw (Exception)
+	iterator end(ListID listID)
 	{
 		rdlock();
 		list_iterator iter;
@@ -2673,7 +2966,7 @@ protected:
 	/**
 	 * Find list with specified ID (listID).
 	 */
-	list_iterator findList(ListID listID) throw (Exception)
+	list_iterator findList(ListID listID)
 	{
 		list_iterator iter = repo.find(listID);
 		if (iter == repo.end()) {
