@@ -67,5 +67,4 @@ src/.deps/
 src/.libs/
 src/Makefile
 src/Makefile.in
-examples/
 stamp-h1

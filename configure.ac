@@ -11,7 +11,7 @@ m4_define([package_version],
 AC_PREREQ([2.63])
 AC_INIT([package_name], [package_version], [package_name@cloudavid.com])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR(src/)
+AC_CONFIG_SRCDIR(src/, examples/)
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE
@@ -73,6 +73,7 @@ includedir=${prefix}/include
 
 AC_OUTPUT(Makefile
 	src/Makefile
+	examples/Makefile
 	package_name.pc
 	package_name.spec
 	package_name.info
