@@ -36,7 +36,7 @@ public:
 	{
 		role = _role;
 	}
-	User *newT() throw (Exception);
+	User *newT();
 
 public:
 	static const string	typeString[MAX];
@@ -80,7 +80,6 @@ public:
 	void set_password(const string _password)
 	{
 		password = _password;
-		password.encrypt_md5();
 	}
 
 private:

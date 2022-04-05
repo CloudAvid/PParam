@@ -72,6 +72,35 @@ private:
 };
 
 /**
+ * \class CryptoParam
+ * \author Hamed Haji Hussaini
+ * \brief Definea cryptography parameter
+ */
+class CryptoParam : public XTextParam
+{
+public:
+	CryptoParam(const string &name) : XTextParam(name)
+	{
+	}
+	CryptoParam(CryptoParam &&_cp) : XTextParam(std::move(_cp))
+	{ }
+	virtual XParam &operator = (const string &text)
+	{
+		val = text;
+		return *this;
+	}
+	virtual XParam &operator = (const char *text)
+	{
+		val = text;
+
+		return *this;
+	}
+
+private:
+	string md5(const string &text);
+};
+
+/**
  * \class BoolEnum
  * \author Hamid Jafarian(hamid.jafarian@pdnsoft.com)
  * Defines different values for bool parameter.
