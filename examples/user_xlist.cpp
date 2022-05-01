@@ -5,7 +5,7 @@ const string	UserRole::typeString[MAX] = {
 					"remote"
 					};
 
-User *UserRole::newT() throw (Exception)
+User *UserRole::newT()
 {
 	if (role.get_value() == ADMINISTRATOR)
 		return new Administrator;

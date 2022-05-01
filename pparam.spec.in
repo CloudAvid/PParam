@@ -1,16 +1,16 @@
 Name:          @PACKAGE_RPMNAME@
 Version:       @PACKAGE_RPMVERSION@
 Release:        @RELEASE_VERSION@%{?dist}
-Summary:       pparam library from PDNSoft 
+Summary:       pparam library from CloudAvid
 
 Group:	pvm-core
 License:  Pre
-URL:      http://www.pdnsoft.com/
+URL:      http://www.cloudavid.com/
 Source0:   @PACKAGE_RPMNAME@-@PACKAGE_RPMVERSION@.tgz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 #BuildRequires:  
-#Requires:
+Requires: libxml2 libuuid openssl glibmm24 sqlite
        
 %description
 pparam tools
@@ -56,6 +56,7 @@ rm -rf $RPM_BUILD_ROOT
 @includedir@/pvm/pparam/xobject.hpp
 @includedir@/pvm/pparam/xparam.hpp
 @includedir@/pvm/pparam/xparam.tcc
+@includedir@/pvm/pparam/xml.hpp
 
 %postun -p /sbin/ldconfig
 

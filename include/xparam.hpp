@@ -5,8 +5,8 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
- * \author hamid jafarian (hamid.jafarian\pdnsoft.com)
+ * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xparam is part of PParam.
  *
@@ -28,7 +28,7 @@
 #define _PDN_XPARAM_HPP_
 
 #include <iostream>
-#include <libxml++/libxml++.h>
+#include "xml.hpp"
 
 #include "exception.hpp"
 
@@ -45,20 +45,24 @@ using std::map;
 #include <algorithm>
 using std::find;
 
+#include <thread>
+
 #include "xdbengine.hpp"
 #include "xlist.hpp"
 
 namespace pparam
 {
-typedef char		XByte;
-typedef unsigned char	XUByte;
-typedef short		XShort;
-typedef unsigned short	XUShort;
-typedef int		XInt;
-typedef unsigned int	XUInt;
-typedef long		XLong;
-typedef unsigned long	XULong;
-typedef float		XFloat;
+typedef char			XByte;
+typedef unsigned char		XUByte;
+typedef short			XShort;
+typedef unsigned short		XUShort;
+typedef int			XInt;
+typedef unsigned int		XUInt;
+typedef long			XLong;
+typedef unsigned long		XULong;
+typedef float			XFloat;
+typedef unsigned long long 	XULLong;
+typedef long long 		XLLong;
 
 /**
  * \class XParam (X Parameter)
@@ -69,10 +73,10 @@ class XParam
 public:
 	/** Parser for xml documents.
 	 */
-	typedef xmlpp::DomParser XmlParser;
+	typedef xml::Parser XmlParser;
 	/** Node in parseed xml document.
 	 */
-	typedef xmlpp::Node XmlNode;
+	typedef xml::Node XmlNode;
 	/** typedef for byte values in XParam.
 	 */
 	typedef pparam::XByte XByte;
@@ -159,22 +163,21 @@ public:
 	 * \param xstr xml document.
 	 * \param parser pointer to the specified parser to use from.
 	 */
-	void loadXmlStr(string xstr, XmlParser *parser = NULL)
-						throw (Exception);
+	void loadXmlStr(const string &xstr, XmlParser *parser = NULL);
 	/**
 	 * Load parameter from xml-formatted content of specified file.
 	 *
 	 * This function would read xml document, parse him and pass the
 	 * pointer of dom-root node to the parameter.
 	 */
-	void loadXmlDoc(string xdoc, XmlParser *parser = NULL)
-						throw (Exception);
+	void loadXmlDoc(const string &xdoc, XmlParser *parser = NULL,
+			bool checksum = false, const string &iv = "");
 	/**
 	 * Save the xml output of xparam in the specified file.
 	 */
-	void saveXmlDoc(string xdoc,
-			bool show_runtime = false, const int &indent = 0,
-			bool with_endl = false) const throw (Exception);
+	void saveXmlDoc(const string &xdoc, bool show_runtime = false,
+			const int &indent = 0, bool with_endl = false,
+			bool checksum = false, const string &iv = "") const;
 	/**
 	 * return parameter value.
 	 */
@@ -211,7 +214,7 @@ public:
 	 */
 	virtual string _xml(bool show_runtime,
 			const int &indent, const string &endl) const = 0;
-	/**
+    /**
 	 * Verifies parameter value.
 	 *
 	 * This function should be used after reading the parameter value
@@ -255,7 +258,7 @@ public:
 	 * This function is used in "operator=(const XmlNode *node)".
 	 * He verifies parameter name and version(if not empty) attribute.
 	 */
-	bool is_myNode(const XmlNode *node) throw (Exception);
+	bool is_myNode(const XmlNode *node);
 
 	virtual ~XParam() {}
 protected:
@@ -307,10 +310,9 @@ public:
 	/** Read parameter value from xml config file.
 	 * \param node pointer to parameter node in XML document.
 	 */
-	virtual XParam &operator = (const XmlNode *node)
-						throw (Exception);
-	virtual bool operator == (const XParam &) throw (Exception);
-	virtual bool operator != (const XParam &) throw (Exception);
+	virtual XParam &operator = (const XmlNode *node);
+	virtual bool operator == (const XParam &);
+	virtual bool operator != (const XParam &);
 	virtual string _xml(bool show_runtime,
 				const int &indent, const string &endl) const;
 	virtual ~XSingleParam() {}
@@ -339,20 +341,18 @@ public:
 	_XMixParam(_XMixParam &&);
 	_XMixParam(const string &_pname);
 
-	virtual XParam &operator = (const XParam::XmlNode *node)
-						throw (Exception);
+	virtual XParam &operator = (const XParam::XmlNode *node);
 	virtual XParam &operator = (const string &) { return *this; }
-	virtual XParam &operator = (const XParam &xp)
-						throw (Exception);
-	virtual bool operator == (const XParam &) throw (Exception);
-	virtual bool operator != (const XParam &) throw (Exception);
+	virtual XParam &operator = (const XParam &xp);
+	virtual bool operator == (const XParam &);
+	virtual bool operator != (const XParam &);
 	virtual string _xml(bool show_runtime,
 				const int &indent, const string &endl) const;
 	virtual string value() const { return ""; }
 	virtual void reset();
 	virtual XParam *value(int index) const;
 	virtual XParam *value(string name) const;
-	virtual bool verify() throw (Exception);
+	virtual bool verify();
 	/** Add one sub-parameter to list of sub-parameters. */
 	virtual void addParam(XParam *param) { params.push_back(param); }
 
@@ -383,39 +383,36 @@ public:
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbSave(const XParam *parentNode =
-		(XParam *) NULL) throw (Exception);
+		(XParam *) NULL);
 	/**
 	 * Update stored data using this XParam and its children by
 	 * associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbUpdate(const XParam *parentNode =
-		(XParam *) NULL) throw (Exception);
+		(XParam *) NULL);
 	/**
 	 * Remove stored data of this XParam and its children by
 	 * associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbDelete(const XParam *parentNode =
-		(XParam *) NULL) throw (Exception);
+		(XParam *) NULL);
 	/**
 	 * Create proper structer of data in database for
 	 * XParam and its children by associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbCreateStructure(const XParam *parentNode =
-		(XParam *) NULL) throw (Exception);
+		(XParam *) NULL);
 	/**
 	 * Destroys related databse's data structure
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbDestroyStructure(const XParam *parentNode 
-						= (XParam *) NULL) 
-						throw (Exception);
-	virtual void dbLoad(const XParam *parentNode = (XParam *) NULL) 
-						throw (Exception);
-	virtual void dbLoad(stringList &fields, stringList &values)
-						throw (Exception);
+						= (XParam *) NULL); 
+	virtual void dbLoad(const XParam *parentNode = (XParam *) NULL) ;
+	virtual void dbLoad(stringList &fields, stringList &values);
 	virtual void setDBEngine(XDBEngine *engine);
 	virtual XDBEngine *getDBEngine();
 	virtual string generateJoinStmts(const XParam *parentNode =
@@ -448,7 +445,7 @@ public:
 	XTextParam &operator = (const XTextParam &vtp);
 	virtual XParam &operator = (const string &str);
 	virtual XParam &operator = (const char *str);
-	virtual XParam &operator = (const XParam &xp) throw (Exception);
+	virtual XParam &operator = (const XParam &xp);
 	string value() const;
 	virtual void reset();
 	void set_cdata(const bool _cdata);
@@ -501,7 +498,7 @@ public:
 	{ }
 
 	//XIntParam &operator = (const XIntParam &vip) { val = vip.val; }
-	virtual XParam &operator = (const string &str) throw (Exception)
+	virtual XParam &operator = (const string &str)
 	{
 		T value;
 		std::istringstream iss(str);
@@ -509,12 +506,12 @@ public:
 
 		return (*this) = value;
 	}
-	virtual XParam &operator=(const T &value) throw (Exception)
+	virtual XParam &operator=(const T &value)
 	{
 		set_value(value);
 		return (*this);
 	}
-	virtual XParam &operator=(const XParam &xp) throw (Exception);
+	virtual XParam &operator=(const XParam &xp);
 	virtual _XIntParam &operator++();
 	virtual _XIntParam operator++(int);
 	virtual _XIntParam &operator--();
@@ -527,7 +524,7 @@ public:
 		return oss.str();
 	}
 	virtual void reset() { val = min; }
-	void set_value(const T &value) throw (Exception) 
+	void set_value(const T &value) 
 	{ 
 		if ((max >= min) /* we should check boundries. */
 			&& (value < min || value > max)) {
@@ -582,13 +579,13 @@ public:
 
 		return *this;
 	}
-	virtual XParam &operator = (const string &) throw (Exception);
-	virtual XParam &operator = (const XFloat &) throw (Exception);
-	virtual XParam &operator = (const XParam &xp) throw (Exception);
+	virtual XParam &operator = (const string &);
+	virtual XParam &operator = (const XFloat &);
+	virtual XParam &operator = (const XParam &xp);
 	string value() const;
 	virtual void reset() { val = min; }
 	XFloat float_value() const { return val; }
-	void set_value(const XFloat &value) throw (Exception)
+	void set_value(const XFloat &value)
 		{ (*this) = value; }
 	XParam::XFloat get_value() const { return val; }
 	virtual ~XFloatParam() {}
@@ -629,6 +626,8 @@ public:
 			unsigned short _def) :
 			XSingleParam(_pname), def(_def), val(_def)
 			{}
+	XEnumParam() : XEnumParam("value", T::MAX)
+			{}
 	XEnumParam(XEnumParam &&_xep) : XSingleParam(std::move(_xep)),
 				def(_xep.def), val(_xep.def)
 			{}
@@ -638,7 +637,7 @@ public:
 
 		return *this;
 	}
-	virtual XParam &operator = (const string &str) throw (Exception)
+	virtual XParam &operator = (const string &str)
 	{
 		for (int i = 0; i < static_cast<XInt>(T::MAX); ++i) {
 			if (str == T::typeString[i]) {
@@ -646,23 +645,23 @@ public:
 				return (*this);
 			}
 		}
-		throw Exception("Bad <" + pname + "> value !",
+		throw Exception("Bad '" + pname + "' value !",
 						TracePoint("pparam"));
 	}
-	virtual XParam &operator = (const XInt &value) throw (Exception)
+	virtual XParam &operator = (const XInt &value)
 	{
 		set_value(value);
 
 		return *this;
 	}
-	virtual XParam &operator = (const XParam &xp) throw (Exception);
+	virtual XParam &operator = (const XParam &xp);
 	virtual string value() const
 	{
 		if (val < 0 || val >= T::MAX) return "";
 		return T::typeString[val];
 	}
 	virtual void reset() { val = def; }
-	virtual void set_value(const int &value) throw (Exception)
+	virtual void set_value(const int &value)
 	{ 
 		if (value >= 0 && value <= T::MAX) val = value;
 		else throw Exception("Bad <" + pname + "> value !",
@@ -716,6 +715,11 @@ public:
 	using XParam::get_pname;
 	using XParam::assignHelper;
 
+	enum SortMode {
+                ASCENDING,
+                DESCENDING,
+                };
+
 	XSetParam(const string &_pname) : XMixParam(_pname),
 						smapEnabled(false) {}
 	XSetParam(XSetParam &&_xsp) : XMixParam(std::move(_xsp)),
@@ -726,8 +730,8 @@ public:
 	/**
 	 * \param node pointer to parameter node in XML document.
 	 */
-	virtual XParam &operator=(const XmlNode *node) throw (Exception);
-	virtual XParam &operator=(const XParam &xp) throw (Exception);
+	virtual XParam &operator=(const XmlNode *node);
+	virtual XParam &operator=(const XParam &xp);
 	/**
 	 * Add a copy of T-object to set.
 	 *
@@ -749,7 +753,7 @@ public:
 		}
 		return (T *)sparam;
 	}
-	virtual void addParam(XParam *param) throw (Exception)
+	virtual void addParam(XParam *param)
 	{
 		T *sparam = dynamic_cast<T *>(param);
 		if (sparam == NULL) {
@@ -794,7 +798,7 @@ public:
 	 * manually. Call of this function may occure at any time of
 	 * life cycle of XSetParam object.
 	 */
-	void enable_smap() throw (Exception)
+	void enable_smap()
 	{
 		for (iterator iter = begin(); iter != end(); ++iter) {
 			try {
@@ -822,6 +826,20 @@ public:
 		const_smiterator iter = smap.find(_key);
 		if (iter != smap.end()) return iter->second;
 		return NULL;
+	}
+	/**
+	 * Find parameter based on Pred.
+	 *
+	 * No need to enable smap.
+	 */
+	template <class Pred>
+	T *query(Pred pred)
+	{
+		for (iterator iter = begin(); iter != end(); ++iter) {
+			if (pred((T*) *iter))
+				return ((T*) *iter);
+		}
+		return nullptr;
 	}
 	/**
 	 * Find parameter with highest key.
@@ -896,6 +914,77 @@ public:
 		params.erase(iter);
 		return ret;
 	}
+	/**
+	 * This function will sort XSetParam like a bubble sort.
+	 *
+         * \param compare is a template.
+	 * If compare was function then accept two params of T*,
+	 * and about return: if first param is less than second param return 1,
+         * if first param is equal to second param return 0,
+         * else return -1.
+	 *
+	 * If compare was class then overwrite () operator, with two params of T*.
+	 *
+	 * The following is two sample of compare templates:
+	 * \code
+	 * 	int myfunction (T* i,T* j) { return (i<j); }
+	 *
+	 * 	struct myclass {
+	 * 		int operator() (T* i,T* j) { return (i<j);}
+	 * 	} myobject;
+	 * \endcode
+	 *
+	 * \param mode is sort mode.
+	 * If mode was ASCENDING, sorted as Ascending,
+	 * else, sorted as Descending.
+         */
+	template<class Compare>
+        void sort(Compare compare,
+			SortMode mode = SortMode::ASCENDING)
+        {
+
+                int size = this->size();
+                int asc;
+
+                (mode == ASCENDING) ? asc = -1 : asc = 1;
+
+                for (auto i = 0; i != size-1; ++i) {
+                        auto beg = begin();
+                        for (auto k = 0; k < size-i-1; ++k) {
+                                auto iter1 = beg;
+                                auto iter2 = beg;
+                                iter2 ++;
+                                auto t1 = static_cast<T*>(*iter1);
+                                auto t2 = static_cast<T*>(*iter2);
+				if (compare(t1, t2) == asc)
+					std::iter_swap(iter1, iter2);
+				++beg;
+			}
+		}
+	}
+	/**
+	 * Iterate on list and call
+	 * callback for all of them.
+	 */
+	template <class CallBack>
+	void iterate(CallBack callback)
+	{
+		for (iterator iter = begin(); iter != end(); ++iter) {
+			callback((T*) *iter);
+		}
+	}
+	/**
+	 * Iterate on list until the callback returns true.
+	 */
+	template <class CallBack>
+	bool iterate_until(CallBack callback)
+	{
+		for (iterator iter = begin(); iter != end(); ++iter) {
+			if (! callback((T*) *iter))
+				return false;
+		}
+		return true;
+	}
 
 	// Database functions
 	/**
@@ -903,37 +992,33 @@ public:
 	 * to database.
 	 * \param [in] parentNode Parent XParam of this object
 	 */
-	virtual void dbSave(const XParam *parentNode = (XParam *)NULL)
-							throw (Exception);
+	virtual void dbSave(const XParam *parentNode = (XParam *)NULL);
 	/**
 	 * Update stored data using this XParam and its children by
 	 * associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
-	virtual void dbUpdate(const XParam *parentNode = (XParam *)NULL)
-							throw (Exception);
+	virtual void dbUpdate(const XParam *parentNode = (XParam *)NULL);
 	/**
 	 * Remove stored data of this XParam and its children by
 	 * associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
-	virtual void dbDelete(const XParam *parentNode = (XParam *)NULL)
-							throw (Exception);
+	virtual void dbDelete(const XParam *parentNode = (XParam *)NULL);
 	/**
 	 * Create proper structer of data in database for
 	 * XParam and its children by associated XDBEngine
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbCreateStructure(const XParam *parentNode =
-					(XParam *) NULL) throw (Exception);
+					(XParam *) NULL);
 	/**
 	 * Destroys related databse's data structure
 	 * \param [in] parentNode Parent XParam of this object
 	 */
 	virtual void dbDestroyStructure(const XParam *parentNode =
-					(XParam *) NULL) throw (Exception);
-	virtual void dbLoad(const XParam *parentNode = (XParam *) NULL)
-							throw (Exception);
+					(XParam *) NULL);
+	virtual void dbLoad(const XParam *parentNode = (XParam *) NULL);
 	virtual void dbQuery(XDBCondition &conditions);
 	virtual string generateJoinStmts(const XParam *parentNode =
 							(XParam *)NULL);
@@ -950,7 +1035,7 @@ protected:
 	 * Also we can't store parametes with same IDs. Each paramter should
 	 * have a unique ID.
 	 */
-	void add2SMap(iterator iter) throw (Exception)
+	void add2SMap(iterator iter)
 	{
 		Key _key;
 		T *tparam = static_cast<T *>(*iter);
@@ -1020,7 +1105,7 @@ protected:
 	 * new functions ..
 	 * This functions enable us to implement XISetParam functionalities.
 	 */
-	virtual T *newT(const XmlNode *node) throw (Exception)
+	virtual T *newT(const XmlNode *node)
 	{
 		T *t =  new T;
 		if (t == NULL)
@@ -1028,7 +1113,7 @@ protected:
 						TracePoint("pparam"));
 		return t;
 	}
-	virtual T *newT(const T &t) throw (Exception)
+	virtual T *newT(const T &t)
 	{
 		return newT((const XmlNode *)NULL);
 	}
@@ -1087,7 +1172,7 @@ public:
 	{ }
 
 protected:
-	virtual T *newT(const XParam::XmlNode *node) throw (Exception)
+	virtual T *newT(const XParam::XmlNode *node)
 	{
 		Type tp;
 		*(XParam *) &tp = node;
@@ -1096,7 +1181,7 @@ protected:
 			throw Exception("newT failed!", TracePoint("pparam"));
 		return tmp;
 	}
-	virtual T *newT(const T &t) throw (Exception)
+	virtual T *newT(const T &t)
 	{
 		Type tp;
 		t.type(tp);
@@ -1228,9 +1313,15 @@ public:
 	void xdel(iterator &iter)
 	{
 		if (iter != end()) {
-			XParam *xparam = *iter;
-			params.xerase(iter);
-			delete xparam;
+			/* In cases where there is an iterator to the object,
+			 * this function will be blocked until iterator is released.
+			 * for prevent blocking, this function will be executed in another thread.
+			 */
+			std::thread([this, iter]() {
+				XParam *xparam = *iter;
+				params.xerase(iter);
+				delete xparam;
+			}).detach();
 		}
 	}
 	/**
@@ -1314,6 +1405,110 @@ protected:
 	 * \see XSetParam::smap.
 	 */
 	map smap;
+};
+
+/**
+ * \class XEnumSetParam
+ * This class implements a set of specified enum.
+ *
+ * This class inherited from XSetParam with some additive methods
+ * i.e. addEnum, exist and delEnum.
+ *
+ * The following is an output sample:
+ * \code
+ * 	<_pname>
+ * 		<_tagName>....</_tagName>
+ * 		.
+ * 		.
+ * 		.
+ * 	</_pname>
+ * \endcode
+ */
+template <typename T>
+class XEnumSetParam : public XSetParam<XEnumParam<T>>
+{
+public:
+	typedef XEnumParam<T> EnumParam;
+
+	/**
+	 * \param _tagName The tag with the name is in it
+	 */
+	XEnumSetParam(const std::string &_pname,
+		const std::string &_tagName = "value"):
+		XSetParam<EnumParam>(_pname)
+	{
+		tagName = _tagName;
+	}
+
+	/**
+	 * \param tVal is enum type
+	 * \return existence or nonexistence of tVal in set.
+	 */
+	bool exist(XInt tVal)
+	{
+		for (auto iter = this->begin();
+				iter != this->end(); ++iter) {
+			auto tmp = static_cast<EnumParam*>(*iter);
+			if (tmp->get_value() == tVal)
+				return true;
+		}
+		return false;
+	}
+	 /**
+	 * Add tVal to set.
+	 * \param tVal is enum type
+	 */
+	void addEnum(XUInt tVal)
+	{
+		EnumParam *val;
+		try {
+			val = new EnumParam(tagName, tVal);
+			this->addParam(val);
+		} catch (Exception &e) {
+			if (val)
+				delete val;
+			e.addTracePoint(TracePoint("pparam"));
+			throw e;
+		} catch (std::bad_alloc &e) {
+			throw Exception(e.what(), TracePoint("pparam"));
+		}
+	}
+
+	 /**
+	 * \param tVal is enum type
+	 * \return existence or nonexistence of a tVal and remove it.
+	 */
+	bool delEnum(XInt tVal)
+	{
+		if (exist(tVal)) {
+			for (auto iter = this->begin();
+						iter != this->end(); ++iter) {
+				auto tmp = static_cast<EnumParam*>(*iter);
+				if (tmp->get_value() == tVal) {
+					this->del(iter);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+private:
+	/**
+	 * new functions.
+	 * This functions enable us to implement XISetParam functionalities.
+	 */
+	virtual EnumParam *newT(const XParam::XmlNode *node)
+	{
+		try {
+			auto *t =  new EnumParam(tagName, T::MAX);
+			return t;
+		} catch (std::bad_alloc &e) {
+			throw Exception(e.what(), TracePoint("pparam"));
+		}
+	}
+
+private:
+	std::string	tagName;
 };
 
 } // namespace pparam

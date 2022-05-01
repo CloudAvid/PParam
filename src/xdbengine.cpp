@@ -30,7 +30,7 @@ SQLiteDBEngine::~SQLiteDBEngine()
 	pthread_key_delete(transactionBufferTSMKey);
 }
 
-void SQLiteDBEngine::connect(string fileName) throw (Exception)
+void SQLiteDBEngine::connect(string fileName)
 {
 	if (sqlite3_open(fileName.c_str(), &dbp)) {
 		stringstream buff;
@@ -48,7 +48,7 @@ void SQLiteDBEngine::disconnect()
 	sqlite3_close(dbp);
 	isconnected = false;
 }
-void SQLiteDBEngine::execute(string command) throw (Exception)
+void SQLiteDBEngine::execute(string command)
 {
 	if (onTransaction) {
 #ifdef SQLDEBUG
@@ -87,7 +87,7 @@ void SQLiteDBEngine::startTransaction()
 	onTransaction = true;
 }
 
-void SQLiteDBEngine::commitTransaction() throw (Exception)
+void SQLiteDBEngine::commitTransaction()
 {
 #ifdef SQLDEBUG
 	cout << "\nDB q c";
@@ -128,7 +128,7 @@ void SQLiteDBEngine::commitTransaction() throw (Exception)
 	}
 	onTransaction = false;
 }
-void SQLiteDBEngine::rollbackTransaction() throw (Exception)
+void SQLiteDBEngine::rollbackTransaction()
 {
 #ifdef SQLDEBUG
 	cout << "\nDB q r";
@@ -147,7 +147,6 @@ void SQLiteDBEngine::rollbackTransaction() throw (Exception)
 }
 void SQLiteDBEngine::saveXParam(string pname, string pkey, string parentName,
 	string parentKey, stringList fields, stringList values)
-		throw (Exception)
 {
 	if (fields.size() != values.size())
 		throw Exception("size of 'fields' and 'values' is not equal.",
@@ -181,7 +180,6 @@ void SQLiteDBEngine::saveXParam(string pname, string pkey, stringList fields,
 
 void SQLiteDBEngine::updateXParam(string pname, string pkey, string parentName,
 	string parentKey, stringList fields, stringList values)
-		throw (Exception)
 {
 	if (fields.size() != values.size())
 		throw Exception("size of 'fields' and 'values' is not equal.",
@@ -233,7 +231,6 @@ void SQLiteDBEngine::removeXParamByParent(string pname, string parentName,
 
 void SQLiteDBEngine::createXParamStructure(string pname, string parentName,
 	stringList fields, vector<DBFieldTypes> fieldTypes)
-		throw (Exception)
 {
 	if (fields.size() != fieldTypes.size())
 		throw Exception(
@@ -270,7 +267,6 @@ void SQLiteDBEngine::destroyXParamStructure(string pname)
 
 int SQLiteDBEngine::loadXParamRow(string pname, string pkey, string parentName,
 	string parentKey, stringList& fields, stringList& values)
-		throw (Exception)
 {
 	string sqls = "SELECT * FROM " + pname + " WHERE " + pname + "_key=\""
 		+ pkey + "\"";
@@ -316,7 +312,6 @@ int SQLiteDBEngine::loadXParamRow(string pname, string pkey, stringList& fields,
 
 int SQLiteDBEngine::loadXParamValueListByParent(string pname, string parentName,
 	string parentKey, string fieldName, stringList& values)
-		throw (Exception)
 {
 	string sqls = "SELECT " + fieldName + " FROM " + pname + " WHERE "
 		+ parentName + "_key=\"" + parentKey + "\"";
@@ -349,7 +344,6 @@ int SQLiteDBEngine::loadXParamValueListByParent(string pname, string parentName,
 
 void SQLiteDBEngine::getData(string selectstmt,
 	vector<vector<string> > &results, vector<string> &columns)
-		throw (Exception)
 {
 	sqlite3_stmt* stmt;
 	int res = sqlite3_prepare_v2(dbp, selectstmt.c_str(), -1, &stmt, NULL);

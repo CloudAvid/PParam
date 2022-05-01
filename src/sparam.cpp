@@ -1,6 +1,7 @@
 #include "sparam.hpp"
 #include "math.h"
 #include <iostream>
+#include <stdlib.h>
 #define checkByteRange(n) (n<0?false:(n>255?false:true))
 #define checkWordRange(n) (n<0?false:(n>65535?false:true))
 
@@ -29,7 +30,7 @@ UUIDParam &UUIDParam::operator = (const UUIDParam &uuidp)
 	return *this;
 }
 
-XParam &UUIDParam::operator = (const string &str) throw (Exception)
+XParam &UUIDParam::operator = (const string &str)
 {
 	int ret = uuid_parse(str.c_str(), uuid);
 	if (ret == -1)
@@ -37,7 +38,7 @@ XParam &UUIDParam::operator = (const string &str) throw (Exception)
 	return *this;
 }
 
-XParam &UUIDParam::operator = (const XParam &xp) throw (Exception)
+XParam &UUIDParam::operator = (const XParam &xp)
 {
 	const UUIDParam *uuidp = dynamic_cast<const UUIDParam *>(&xp);
 	if (uuidp == NULL)
@@ -57,26 +58,9 @@ string UUIDParam::value() const
 	return uuid_str;
 }
 
-/** Implementation of "CryptoParam" class */
-
-string CryptoParam::md5(const string &text)
+string UUIDParam::get_value() const
 {
-	GString*	gString;
-	MD5_CTX		md5Context;
-	string		cryptedText;
-	unsigned char	mdText[32];
-	unsigned char	index;
-
-	MD5_Init(&md5Context);
-	MD5_Update( &md5Context, text.c_str(), text.length());
-	MD5_Final( mdText, &md5Context);
-	gString = (GString*) g_malloc0(sizeof(GString));
-	for (index = 0; index < 16; index++)
-		g_string_append_printf(gString, "%02x", mdText[index]);
-	cryptedText.assign(gString->str);
-	g_free(gString);
-
-	return cryptedText;
+	return value();
 }
 
 /* Implementation of Bool/BoolParam classes.
@@ -183,7 +167,7 @@ BoolParam &BoolParam::operator=(const bool &value)
 	return *this;
 }
 
-BoolParam &BoolParam::operator=(const XInt &value) throw (Exception)
+BoolParam &BoolParam::operator=(const XInt &value)
 {
 	set_value(value);
 	return *this;
@@ -201,10 +185,31 @@ bool BoolParam::operator==(const XInt &value)
 	return val == value;
 }
 
-/* Implementation of "DateParam" class
- */
+/** Implementation of "DateParam" class */
+
+DateParam::DateParam(const string &name) :
+	XSingleParam(name)
+{
+	year = month = day = 0;
+}
+
+DateParam::DateParam(const DateParam &date) :
+	XSingleParam(date.get_pname())
+{
+	year = date.year;
+	month = date.month;
+	day = date.day;
+}
+
+DateParam::DateParam(DateParam &&_dp) :
+	XSingleParam(std::move(_dp)),
+	year(_dp.year),
+	month(_dp.month),
+	day(_dp.day)
+{
+}
+
 DateParam &DateParam::operator = (const DateParam &dateParam)
-					throw (Exception)
 {
 	year = dateParam.year;
 	month = dateParam.month;
@@ -213,7 +218,7 @@ DateParam &DateParam::operator = (const DateParam &dateParam)
 	return *this;
 }
 
-XParam &DateParam::operator = (const string &date) throw (Exception)
+XParam &DateParam::operator = (const string &date)
 {
 	int	result;
 	int	_day;
@@ -231,7 +236,7 @@ XParam &DateParam::operator = (const string &date) throw (Exception)
 	return *this;
 }
 
-XParam &DateParam::operator = (const XParam &parameter) throw (Exception)
+XParam &DateParam::operator = (const XParam &parameter)
 {
 	const DateParam	*date = dynamic_cast<const DateParam*>(&parameter);
 
@@ -332,6 +337,36 @@ long DateParam::operator - (DateParam &date)
 	return daysOfDate() - date.daysOfDate();
 }
 
+unsigned short DateParam::get_year() const
+{
+	return year;
+}
+
+void DateParam::set_year(unsigned short _year)
+{
+	year = _year;
+}
+
+unsigned short DateParam::get_month() const
+{
+	return month;
+}
+
+void DateParam::set_month(unsigned short _month)
+{
+	month = _month;
+}
+
+unsigned short DateParam::get_day() const
+{
+	return day;
+}
+
+void DateParam::set_day(unsigned short _day)
+{
+	day = _day;
+}
+
 unsigned short DateParam::get_weekday()
 {
 	DateParam	date(get_pname());
@@ -384,6 +419,11 @@ string DateParam::value() const
 	return dateString;
 }
 
+void DateParam::reset()
+{
+	year = month = day = 0;
+}
+
 string DateParam::formattedValue(const string format) const
 {
 	char	*date;
@@ -392,6 +432,7 @@ string DateParam::formattedValue(const string format) const
 	try {
 		date = new char[format.length()];
 	} catch (std::bad_alloc &exception) {
+		return std::string();
 	}
 	sprintf( date, format.c_str(), year, month, day);
 	dateString.assign(date);
@@ -400,19 +441,74 @@ string DateParam::formattedValue(const string format) const
 	return dateString;
 }
 
+std::string DateParam::isoFormat() const
+{
+	return formattedValue("%04d-%02d-%02d");
+}
+
 void DateParam::now()
 {
-	char	buffer[11];
+	char	buffer[22];
 	time_t	rawTime;
 
 	std::time(&rawTime);
-	strftime(buffer, sizeof(buffer), "%Y/%m/%d",  std::localtime(&rawTime));
+	auto tm = std::localtime(&rawTime);
+	if(tm == NULL)
+		return;
+	strftime(buffer, sizeof(buffer), "%Y/%m/%d",  tm);
 	*this = string(buffer);
 }
 
 unsigned char DateParam::daysOfMonth() const
 {
-	switch (month) {
+	return daysOfMonth(month);
+}
+
+bool DateParam::isLeapYear() const
+{
+	return isLeapYear(year);
+}
+
+unsigned short DateParam::daysOfYear() const
+{
+	if (isLeapYear())
+		return 366;
+
+	return 365;
+}
+
+
+unsigned long DateParam::daysOfDate() const
+{
+	unsigned char	index;
+	unsigned long	days;
+	unsigned short	_year;
+
+	_year = year;
+	if (!_year)
+		_year = 1;
+	days = (_year - 1) * 365;
+	days += ((_year - 1) / 4);
+	if (isLeapYear(year - 1))
+		days++;
+	for (index = 1; index < month; ++index)
+		days += daysOfMonth(index);
+	days += day;
+
+	return days;
+}
+
+bool DateParam::isLeapYear(const XUShort _year) const
+{
+	if (((_year % 4 == 0) && (_year % 100 != 0)) || (_year % 400 == 0))
+		return true;
+
+	return false;
+}
+
+XUByte DateParam::daysOfMonth(const XUShort _month) const
+{
+	switch (_month) {
 		case 1:
 		case 3:
 		case 5:
@@ -433,48 +529,37 @@ unsigned char DateParam::daysOfMonth() const
 	return 28;
 }
 
-bool DateParam::isLeapYear() const
+void DateParam::addDay(unsigned int _day)
 {
-	if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0))
-		return true;
+	std::tm t = {};
+	t.tm_year = year;
+	/*
+	 * For the mktime function, the "t" structure,
+	 * its month index starts from zero(0).
+	 *
+	 * The structure of "t" in our architecture,
+	 * its month field index, becomes one(1), and
+	 * the reason for this is due to the value
+	 * of this structure by the localtime method.
+	 *
+	 * Therefore, we have to correct the structure
+	 * according to the mktime method.
+	 * issue #20730
+	 */
+	t.tm_mon = month - 1;
+	t.tm_mday = day;
 
-	return false;
-}
+	t.tm_mday += _day;
+	std::mktime(&t);
 
-unsigned short DateParam::daysOfYear() const
-{
-	if (isLeapYear())
-		return 366;
-
-	return 365;
-}
-
-
-unsigned long DateParam::daysOfDate()
-{
-	unsigned short	_month;
-	unsigned char	index;
-	unsigned long	days;
-	unsigned short	_year;
-
-	_year = year;
-	if (!_year)
-		_year = 1;
-	days = (_year - 1) * 365;
-	days += ((year - 1) / 4);
-	year--;
-	if (isLeapYear())
-		days++;
-	year++;
-	_month = month;
-	for ( index = 1; index < _month; index++) {
-		month = index;
-		days += daysOfMonth();
-	}
-	month  = _month;
-	days += day;
-
-	return days;
+	year = t.tm_year;
+	/*
+	 * We now restore the structure according to
+	 * our own architecture, which is based on
+	 * the localtime method.
+	 */
+	month = t.tm_mon + 1;
+	day = t.tm_mday;
 }
 
 /* Implementation of "TimeParam" class */
@@ -502,7 +587,6 @@ TimeParam::TimeParam(TimeParam &&_tp) :
 }
  
 TimeParam &TimeParam::operator = (const TimeParam &timeParam)
-					throw (Exception)
 {
 	hour = timeParam.hour;
 	minute = timeParam.minute;
@@ -511,7 +595,7 @@ TimeParam &TimeParam::operator = (const TimeParam &timeParam)
 	return *this;
 }
 
-XParam &TimeParam::operator = (const string &time) throw (Exception)
+XParam &TimeParam::operator = (const string &time)
 {
 	int		result;
 	unsigned int	_hour;
@@ -529,7 +613,7 @@ XParam &TimeParam::operator = (const string &time) throw (Exception)
 	return *this;
 }
 
-XParam &TimeParam::operator = (const XParam &parameter) throw (Exception)
+XParam &TimeParam::operator = (const XParam &parameter)
 {
 	const TimeParam	*time = dynamic_cast<const TimeParam*>(&parameter);
 
@@ -751,11 +835,14 @@ string TimeParam::formattedValue(const string format) const
 
 void TimeParam::now()
 {
-	char	buffer[9];
+	char	buffer[22];
 	time_t	rawTime;
 
 	std::time(&rawTime);
-	strftime(buffer, sizeof(buffer), "%H:%M:%S", std::localtime(&rawTime));
+	auto tm = std::localtime(&rawTime);
+	if (tm == NULL)
+		return;
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", tm);
 	*this = string(buffer);
 }
 
@@ -764,7 +851,129 @@ unsigned long TimeParam::secondsOfTime() const
 	return ((hour * 3600) + (minute * 60) + second);
 }
 
+unsigned int TimeParam::addMinute(unsigned int _minute)
+{
+	unsigned int _m = minute, _h = hour;
+
+	_m += _minute;
+	minute = (_m % 60);
+
+	_h += (_m / 60);
+	hour = (_h % 24);
+
+	return (_h / 24);
+}
+
 /** Implementation of "DateTime" class */
+
+DateTime::DateTime(const string &name) :
+	XSingleParam(name),
+	date("date"),
+	time("time")
+{
+
+}
+
+DateTime::DateTime(const DateTime& dateTime) :
+	XSingleParam("date_time"),
+	date("date"),
+	time("time")
+{
+	date = dateTime.date;
+	time = dateTime.time;
+}
+
+DateTime::DateTime(DateTime &&_dt) :
+	XSingleParam(std::move(_dt)),
+	date(std::move(_dt.date)),
+	time(std::move(_dt.time))
+{
+}
+
+DateParam& DateTime::get_date()
+{
+	return date;
+}
+
+void DateTime::set_date(DateParam &_date)
+{
+	date = _date;
+}
+
+unsigned short DateTime::get_year() const
+{
+	return date.get_year();
+}
+
+void DateTime::set_year(unsigned short year)
+{
+	date.set_year(year);
+}
+
+unsigned short DateTime::get_month() const
+{
+	return date.get_month();
+}
+
+void DateTime::set_month(unsigned short month)
+{
+	date.set_month(month);
+}
+
+unsigned short DateTime::get_day() const
+{
+	return date.get_day();
+}
+
+void DateTime::set_day(unsigned short day)
+{
+	date.set_day(day);
+}
+
+unsigned short DateTime::get_weekday()
+{
+	return date.get_weekday();
+}
+
+TimeParam& DateTime::get_time()
+{
+	return time;
+}
+
+void DateTime::set_time(TimeParam &_time)
+{
+	time = _time;
+}
+
+unsigned short DateTime::get_hour() const
+{
+	return time.get_hour();
+}
+
+void DateTime::set_hour(unsigned short hour)
+{
+	time.set_hour(hour);
+}
+
+unsigned short DateTime::get_minute() const
+{
+	return time.get_minute();
+}
+
+void DateTime::set_minute(unsigned short minute)
+{
+	time.set_minute(minute);
+}
+
+unsigned int DateTime::get_second() const
+{
+	return time.get_second();
+}
+
+void DateTime::set_second(unsigned int second)
+{
+	time.set_second(second);
+}
 
 XParam &DateTime::operator = (const string &strdate)
 {
@@ -824,6 +1033,12 @@ bool DateTime::operator > (DateTime &dateTime)
 	return false;
 }
 
+XULong DateTime::operator - (DateTime& dateTime)
+{
+	return getInSeconds() - dateTime.getInSeconds();
+}
+
+
 bool DateTime::isValid()
 {
 	return date.isValid() && time.isValid();
@@ -836,6 +1051,17 @@ string DateTime::value() const
 	return ss.str();
 }
 
+pparam::XULong DateTime::getInSeconds() const
+{
+	return date.daysOfDate() * 86400 + time.secondsOfTime();
+}
+
+void DateTime::reset()
+{
+	date.reset();
+	time.reset();
+}
+
 string DateTime::formattedValue(const string dateFormat,
 				const string timeFormat,
 				const char separator) const
@@ -846,15 +1072,25 @@ string DateTime::formattedValue(const string dateFormat,
 	return ss.str();
 }
 
+std::string DateTime::isoFormat() const
+{
+	return date.isoFormat() + 'T' + time.value() + 'Z';
+}
+
 void DateTime::now()
 {
 	date.now();
 	time.now();
 }
 
+void DateTime::addMinute(unsigned int _minute)
+{
+	date.addDay(time.addMinute(_minute));
+}
+
 /** implementaion of "IPType" class */
 
-IPParam *IPType::newT() throw (Exception)
+IPParam *IPType::newT()
 {
 	if (!empty())
 		return IPParam::getIP(get_pname(), value());
@@ -866,17 +1102,17 @@ IPParam *IPType::newT() throw (Exception)
 	return NULL;
 }
 
-XParam &IPType::operator = (const XmlNode *node) throw (Exception)
+XParam &IPType::operator = (const XmlNode *node)
 {
-	const xmlpp::TextNode*		nodeText;
-	XmlNode::NodeList		nodeList;
-	XmlNode::NodeList::iterator	iterator;
+	const xml::TextNode*			nodeText;
+	XmlNode::const_NodeList			nodeList;
+	XmlNode::const_NodeList::iterator	iterator;
 
 	set_pname(node->get_name());
 	nodeList = node->get_children();
 	for (iterator = nodeList.begin(); iterator != nodeList.end();
 			iterator++) {
-		nodeText = dynamic_cast<const xmlpp::TextNode*>(*iterator);
+		nodeText = dynamic_cast<const xml::TextNode*>(*iterator);
 		if (nodeText)
 			val = stripBlanks(nodeText->get_content());
 	}
@@ -1015,7 +1251,7 @@ XParam &IPv4Param::operator =(const XParam &iIP)
 	return *this;
 }
 
-void IPv4Param::set(const IPv4Param &iIP) throw (Exception)
+void IPv4Param::set(const IPv4Param &iIP)
 {
 	if (get_pname() != iIP.get_pname())
 		throw Exception(
@@ -1034,7 +1270,7 @@ void IPv4Param::set(const unsigned int &iIP)
 	setAddress(iIP);
 }
 
-void IPv4Param::set(const string &iIP) throw (Exception)
+void IPv4Param::set(const string &iIP)
 {
 	char type = 0;
 	if (iIP.find('\\', 0) != iIP.npos)
@@ -1059,7 +1295,7 @@ void IPv4Param::set(const string &iIP) throw (Exception)
 	}
 }
 
-void IPv4Param::set(const XParam &iIP) throw (Exception)
+void IPv4Param::set(const XParam &iIP)
 {
 	const IPv4Param *ip = dynamic_cast<const IPv4Param*>(&iIP);
 	if (ip == NULL)
@@ -1089,7 +1325,6 @@ void IPv4Param::setAddress(const unsigned int &iIP)
 }
 
 void IPv4Param::setAddress(int part1, int part2, int part3, int part4)
-	throw (Exception)
 {
 	if (checkByteRange(part1) && checkByteRange(part2)
 		&& checkByteRange(part3) && checkByteRange(part4)) {
@@ -1102,7 +1337,7 @@ void IPv4Param::setAddress(int part1, int part2, int part3, int part4)
 	}
 }
 
-void IPv4Param::setAddress(const string &iIP) throw (Exception)
+void IPv4Param::setAddress(const string &iIP)
 {
 	//validate
 	string allowedchars = "0123456789.";
@@ -1147,7 +1382,6 @@ void IPv4Param::setAddress(const string &iIP) throw (Exception)
 }
 
 void IPv4Param::setNetmask(const unsigned int &iNetmask)
-	throw (Exception)
 {
 	if (iNetmask >= 0 && iNetmask <= 32) {
 		netmask = iNetmask;
@@ -1158,7 +1392,7 @@ void IPv4Param::setNetmask(const unsigned int &iNetmask)
 	}
 }
 
-void IPv4Param::setNetmask(const string &iNetmask) throw (Exception)
+void IPv4Param::setNetmask(const string &iNetmask)
 {
 	//validate
 	string allowedchars = "0123456789.";
@@ -1215,7 +1449,6 @@ void IPv4Param::setNetmask(const string &iNetmask) throw (Exception)
 }
 
 void IPv4Param::setNetmask(int part1, int part2, int part3, int part4)
-	throw (Exception)
 {
 	if (checkByteRange(part1) && checkByteRange(part2)
 		&& checkByteRange(part3) && checkByteRange(part4)) {
@@ -1342,7 +1575,7 @@ XParam& IPv6Param::operator =(const XParam& iIP)
 	return *this;
 }
 
-void IPv6Param::set(const IPv6Param& iIP) throw (Exception)
+void IPv6Param::set(const IPv6Param& iIP)
 {
 	if (get_pname() != iIP.get_pname())
 		throw Exception(
@@ -1361,7 +1594,7 @@ void IPv6Param::set(const IPv6Param& iIP) throw (Exception)
 	containNetmask = iIP.containNetmask;
 }
 
-void IPv6Param::set(const IPv4Param& iIP) throw (Exception)
+void IPv6Param::set(const IPv4Param& iIP)
 {
 	if (get_pname() != iIP.get_pname())
 		throw Exception(
@@ -1380,7 +1613,7 @@ void IPv6Param::set(const IPv4Param& iIP) throw (Exception)
 	containNetmask = true;
 }
 
-void IPv6Param::set(const string& iIP) throw (Exception)
+void IPv6Param::set(const string& iIP)
 {
 	try {
 		char type = 0;
@@ -1418,7 +1651,7 @@ void IPv6Param::set(const string& iIP) throw (Exception)
 	}
 }
 
-void IPv6Param::set(const XParam& iIP) throw (Exception)
+void IPv6Param::set(const XParam& iIP)
 {
 	const IPv6Param* ip = dynamic_cast<const IPv6Param*>(&iIP);
 	if (ip == NULL)
@@ -1435,7 +1668,7 @@ void IPv6Param::set(int part1, int part2, int part3, int part4, int part5,
 	setNetmask(netmask);
 }
 
-void IPv6Param::setAddress(const string& iIP) throw (Exception)
+void IPv6Param::setAddress(const string& iIP)
 {
 	//validate
 	string allowedIPv6 = "1234567890ABCDEFabcdef:";
@@ -1443,9 +1676,11 @@ void IPv6Param::setAddress(const string& iIP) throw (Exception)
 		int partCount = 0;
 		string *sparts = split(iIP, ':', partCount);
 		//check box count limits
-		if (partCount < 3 || partCount > 8)
+		if (partCount < 3 || partCount > 8) {
+			delete[] sparts;
 			throw Exception("IP is not valid",
 				TracePoint("sparam"));
+		}
 		//check first box
 		if (sparts[0].empty())
 			sparts[0] = "0";
@@ -1458,10 +1693,12 @@ void IPv6Param::setAddress(const string& iIP) throw (Exception)
 			if (sparts[i].empty()) {
 				if (emptyBox == -1)
 					emptyBox = i;
-				else
+				else {
+					delete[] sparts;
 					throw Exception(
 						"IP is not valid",
 						TracePoint("sparam"));
+				}
 			}
 		if (emptyBox == -1) {
 			if (partCount == 8) {
@@ -1473,16 +1710,20 @@ void IPv6Param::setAddress(const string& iIP) throw (Exception)
 						16);
 					if (checkWordRange(ul))
 						parts[i] = (int) ul;
-					else
+					else {
+						delete[] sparts;
 						throw Exception(
 							"IP is not valid",
 							TracePoint("sparam"));
+					}
 				}
 				for (int i = 0; i < 8; ++i)
 					address[i] = parts[i];
-			} else
+			} else {
+				delete[] sparts;
 				throw Exception("IP is not valid",
 					TracePoint("sparam"));
+			}
 		} else {
 			//incomplate form
 			unsigned long int ul;
@@ -1492,21 +1733,27 @@ void IPv6Param::setAddress(const string& iIP) throw (Exception)
 				ul = strtol(sparts[i].c_str(), NULL, 16);
 				if (checkWordRange(ul))
 					parts[i] = (int) ul;
-				else
+				else {
+					delete[] sparts;
 					throw Exception(
 						"IP is not valid",
 						TracePoint("sparam"));
+				}
 			}
 			//after empty box
 			for (int i = emptyBox + 1; i < partCount; ++i) {
 				ul = strtol(sparts[i].c_str(), NULL, 16);
 				if (checkWordRange(ul))
 					parts[i + (8 - partCount)] = (int) ul;
-				else
+				else {
+					delete[] sparts;
 					throw Exception(
 						"IP is not valid",
 						TracePoint("sparam"));
+				}
 			}
+			delete[] sparts;
+
 			//fill remained empty boexes with 0
 			for (int i = emptyBox;
 				i < emptyBox + (8 - partCount) + 1; i++)
@@ -1520,7 +1767,7 @@ void IPv6Param::setAddress(const string& iIP) throw (Exception)
 }
 
 void IPv6Param::setAddress(int part1, int part2, int part3, int part4,
-	int part5, int part6, int part7, int part8) throw (Exception)
+	int part5, int part6, int part7, int part8)
 {
 	if (checkWordRange(part1) && checkWordRange(part2)
 		&& checkWordRange(part3) && checkWordRange(part4)) {
@@ -1584,7 +1831,6 @@ void IPv6Param::getAddressParts(int* parts)
 }
 
 void IPv6Param::setNetmask(const unsigned int& iNetmask)
-	throw (Exception)
 {
 	if (iNetmask >= 0 && iNetmask <= 128) {
 		netmask = iNetmask;
@@ -1595,7 +1841,7 @@ void IPv6Param::setNetmask(const unsigned int& iNetmask)
 	}
 }
 
-void IPv6Param::setNetmask(const string& iIP) throw (Exception)
+void IPv6Param::setNetmask(const string& iIP)
 {
 	//validate
 	string allowedchars = "0123456789";
@@ -1982,7 +2228,7 @@ void IPxRangeParam::setFrom(const string &iIP)
 		to = "";
 }
 
-void IPxRangeParam::setTo(const string &iIP) throw (Exception)
+void IPxRangeParam::setTo(const string &iIP)
 {
 	if (!has_from())
 		throw Exception("No IP address sets for from",
@@ -2073,7 +2319,6 @@ string IPxRangeParam::getNetmaskString() const
  */
 
 PortParam &PortParam::operator = (const PortParam &portParam)
-					throw (Exception)
 {
 	notSign = portParam.notSign;
 	 from = portParam.from;
@@ -2083,7 +2328,7 @@ PortParam &PortParam::operator = (const PortParam &portParam)
 	return *this;
 }
 
-XParam &PortParam::operator = (const unsigned int port) throw (Exception)
+XParam &PortParam::operator = (const unsigned int port)
 {
 	std::ostringstream	portNo;
 
@@ -2101,7 +2346,7 @@ XParam &PortParam::operator = (const unsigned int port) throw (Exception)
 	return *this;
 }
 
-XParam &PortParam::operator = (const string &port) throw (Exception)
+XParam &PortParam::operator = (const string &port)
 {
 	bool		_notSign = false;
 	bool		doTextProcessing = true;
@@ -2201,7 +2446,7 @@ XParam &PortParam::operator = (const string &port) throw (Exception)
 	return *this;
 }
 
-XParam &PortParam::operator = (const XParam &parameter) throw (Exception)
+XParam &PortParam::operator = (const XParam &parameter)
 {
 	const PortParam	*port = dynamic_cast<const PortParam*>(&parameter);
 
@@ -2218,7 +2463,7 @@ XParam &PortParam::operator = (const XParam &parameter) throw (Exception)
 
 /* Implementation of "MACAddressParam" class.
  */
-XParam &MACAddressParam::operator = (const string &mac) throw (Exception)
+XParam &MACAddressParam::operator = (const string &mac)
 {
 	if (macIsValid(mac))
 		val = mac;
@@ -2229,7 +2474,7 @@ XParam &MACAddressParam::operator = (const string &mac) throw (Exception)
 	return *this;
 }
 
-XParam &MACAddressParam::operator = (const char *mac) throw (Exception)
+XParam &MACAddressParam::operator = (const char *mac)
 {
 	if (macIsValid(mac))
 		val.assign(mac);
@@ -2266,7 +2511,7 @@ bool MACAddressParam::macIsValid(const string &mac)
 /* Implementation of "DBEngineType" class.
  */
 
-DBEngineParam *DBEngineType::newT() throw (Exception)
+DBEngineParam *DBEngineType::newT()
 {
 	DBEngineParam *ret;
 	switch (type.get_value()) {
@@ -2280,12 +2525,12 @@ DBEngineParam *DBEngineType::newT() throw (Exception)
 	return ret;
 }
 
-XParam &DBEngineType::operator = (const XmlNode *node) throw (Exception)
+XParam &DBEngineType::operator = (const XmlNode *node)
 {
 	set_pname(node->get_name());
 	for (iterator iter = params.begin(); iter != params.end(); ++iter) {
 		XParam *child = *iter;
-		const XParam::XmlNode::NodeList nlist = node->get_children(
+		const XParam::XmlNode::const_NodeList nlist = node->get_children(
 			child->get_pname());
 		int lsize = nlist.size();
 		if (lsize == 1)
@@ -2302,4 +2547,343 @@ XParam &DBEngineType::operator = (const XmlNode *node) throw (Exception)
 	return (*this);
 }
 
-} // namespace pparam
+/* Implementation of "EmailParam" class */
+
+EmailParam::EmailParam(const string &_pname) :
+	XTextParam(_pname)
+{
+	this->reset();
+}
+
+EmailParam::EmailParam(EmailParam &&_ep) :
+	XTextParam(std::move(_ep)),
+	emailVal(std::move(_ep.emailVal))
+{
+}
+	
+void EmailParam::set_value(const string &email)
+{
+	if (isValidEmail(email)) {
+		this->emailVal = email;
+	} else {
+		throw Exception("Email is not valid", TracePoint("sparam"));
+	}
+}
+
+void EmailParam::set_value(const char *email)
+{
+	if (isValidEmail(email)) {
+		this->emailVal.assign(email);
+	} else {
+		throw Exception("Email is not valid", TracePoint("sparam"));
+	}
+}
+
+EmailParam &EmailParam::operator = (const EmailParam &_ep)
+{
+	this->emailVal = _ep.emailVal;
+	return *this;
+}
+	
+XParam &EmailParam::operator = (const string &strEmail)
+{
+	this->set_value(strEmail);
+	return *this;
+}
+	
+XParam &EmailParam::operator = (const char *strEmail)
+{
+	this->set_value(strEmail);
+	return *this;
+}
+	
+XParam &EmailParam::operator = (const XParam &_ep)
+{
+	const EmailParam *ep = dynamic_cast<const EmailParam*>(&_ep);        	
+	if (ep == NULL) {
+		throw Exception("Bad Email XParam in assignment ! :(",
+		TracePoint("pparam"));
+	}
+	if (get_pname() != ep->get_pname()) {
+		throw Exception("Different email tagName xparameters "
+				"in assignment !",
+				TracePoint("pparam"));
+	}	
+		
+	try {
+		assignHelper(_ep);
+	} catch (Exception &e) {
+		e.addTracePoint(TracePoint("pparam"));
+		throw e;
+	}
+		
+	this->emailVal = ep->emailVal;	
+	return *this;
+}
+
+bool EmailParam::isValidEmail(string email)
+{
+	std::regex patternEmail(R"((\w+.*)(\.|_)?(\w*)@([a-zA-Z0-9_\.-]+)(\.(\w+))+)");
+	return std::regex_match(email,patternEmail);
+}
+
+/* Implementation of "SIDParam::ConvertSID" class.
+ */
+string SIDParam::ConvertSID::hexToStr(const string &hexSID)
+{
+	int countOfSubIDs = 0;
+	std::stringstream strSID;
+	int currentIndex = 0;
+	string tmp = "";
+
+	strSID << "S-1";
+	currentIndex = 2;
+
+	/* The nextPartOfSID function put a subID in "tmp" from "hexSID"
+	 * and increase "currentIndex" as subID length.
+	 */
+	nextPartOfSID(hexSID, tmp, currentIndex, 2);
+	countOfSubIDs = atoi(tmp.c_str());
+	tmp = "";
+	nextPartOfSID(hexSID, tmp, currentIndex, 12);
+	strSID << "-" << hexToDecimal(tmp);
+	for (int i = 0; i < countOfSubIDs; i++) {
+		tmp = "";
+		nextPartOfSID(hexSID, tmp, currentIndex, 8);
+		string result;
+		/* The toBigOrLittleEndian converts "tmp" from
+		 * little endian to big endain format an put it in "result".
+		 */
+		toBigOrLittleEndian(tmp, result);
+		strSID << "-" << hexToDecimal(result);
+	}
+
+	return strSID.str();
+}
+
+string SIDParam::ConvertSID::strToHex(const string &strSID)
+{
+	std::stringstream hexSID;
+	vector<string> parts;
+	/* "parts" contains 'S', '1', '5', '21', ...
+	 * for this example:
+	 * S-1-5-21-3623811015-3361044348-30300820-1013
+	 *
+	 * S-1		: SID version number.
+	 * 5		: Identity authority.
+	 * 21 and nexts	: Sub IDs
+	 */
+	split(strSID, '-', parts);
+
+	// SubIDs start from 21 or parts[3]
+	int countOfSubIDs = parts.size()-3;
+	// Hex of version number
+	hexSID << "01";
+	// Hex of countOfSubIDs
+	hexSID << decimalToHex(std::to_string(countOfSubIDs),2);
+	// Hex of identity authority
+	hexSID << decimalToHex(parts[2], 12);
+	string tmp;
+	// Hex of sub IDs
+	for (int i = 3; i < 3+countOfSubIDs; i++){
+		/* The toBigOrLittleEndian converts parts from
+		 * big endian to little endain format and put it in "tmp".
+		 */
+		toBigOrLittleEndian(decimalToHex(parts[i], 8), tmp);
+		hexSID << tmp;
+	}
+
+	return hexSID.str();
+}
+
+void SIDParam::ConvertSID::nextPartOfSID(const string &sid, string &part,
+						int &currentIndex, int len)
+{
+	for (int i = 0; i < len; i++) {
+		part.push_back(sid[currentIndex]);
+		currentIndex++;
+	}
+}
+
+long int SIDParam::ConvertSID::hexToDecimal(const string &hexVal)
+{
+	int len = hexVal.length();
+
+	// base value start from 1 (16^0)
+	long int base = 1;
+
+	long int dec_val = 0;
+
+	// Extracting digits from last character
+	for (int i = len-1; i >= 0; i--) {
+		/* if character is '0'-'9', converting it to
+		 * integral 0-9 by subtracting 48 from ASCII value.
+		 */
+		if (hexVal[i] >= '0' && hexVal[i] <= '9')
+			dec_val += (hexVal[i] - 48) * base;
+
+		/* if character is 'A'-'F', converting it to
+		 * integral 10-15 by subtracting 55 from ASCII value.
+		 */
+		else if (toupper(hexVal[i]) >= 'A' && toupper(hexVal[i]) <= 'F')
+			dec_val += (toupper(hexVal[i]) - 55) * base;
+
+		// incrementing base by power
+		base *= 16;
+	}
+	return dec_val;
+}
+
+void SIDParam::ConvertSID::toBigOrLittleEndian(const string &src, string &dst)
+{
+	dst = "";
+	int ByteLen = 2;
+	int SubIDLen = 8;
+	/* Example:
+	 * Big endian hex	: 3D12F4A8
+	 * Little endian hex	: A8F4123D
+	 */
+	for (int i = 2; i <= SubIDLen; i += ByteLen)
+		dst.append(src.substr(src.length()-i, ByteLen));
+}
+
+void SIDParam::ConvertSID::split(string src, char splitter, vector<string> &dst)
+{
+	int pos = 0;
+	string token;
+	while ((pos = (int)src.find(splitter)) != (int)string::npos) {
+		token = src.substr(0, pos);
+		dst.push_back(token);
+		src.erase(0, pos+1);
+	}
+	dst.push_back(src);
+}
+
+string SIDParam::ConvertSID::decimalToHex (const string &decimal, int len)
+{
+	std::stringstream tmp(decimal);
+	long int dec;
+	tmp >> dec;
+	int r, i;
+	char hex[len];
+	for (i = len-1; dec != 0; i--) {
+		r = dec % 16;
+		if (r < 10)
+			// 48 is ASCII code of '0'
+			hex[i] = r + 48;
+		else
+			// 65 (55+10) is ASCII code of 'A'
+			hex[i] = r + 55;
+		dec /= 16;
+	}
+	for (i=i; i >= 0; i--)
+		hex[i] = '0';
+	string output(hex, len);
+	return output;
+}
+
+/* Implementation of "SIDParam" class */
+
+SIDParam::SIDParam(const string &pname) : XSingleParam(pname)
+{
+}
+
+SIDParam::SIDParam(const SIDParam &sidp) : XSingleParam(sidp.get_pname())
+{
+	this->sid = sidp.sid;
+}
+
+void SIDParam::reset()
+{
+	sid = "";
+}
+
+string SIDParam::value() const
+{
+	return sid;
+}
+
+SIDParam &SIDParam::operator = (const SIDParam &sidp)
+{
+	this->sid = sidp.sid;
+	return *this;
+}
+
+XParam &SIDParam::operator = (const string &_str)
+{
+	SIDParam::Type type = wichFormat(_str);
+	switch (type)
+	{
+		case STRING:
+			this->sid = _str;
+			break;
+		case HEX:
+			this->sid = ConvertSID::hexToStr(_str);
+			break;
+	}
+	return *this;
+
+}
+
+XParam &SIDParam::operator = (const XParam &xp)
+{
+	const SIDParam *sidp = dynamic_cast<const SIDParam *>(&xp);
+	if (sidp == NULL)
+		throw Exception("Bad sid param in assginment",
+							TracePoint("sparam"));
+	if (get_pname() != sidp->get_pname())
+		throw Exception("Different sid parameters in assginment !",
+						TracePoint("sparam"));
+	this->sid = sidp->sid;
+	return *this;
+}
+
+string SIDParam::get_value() const
+{
+	// returns SID in string format.
+	return sid;
+}
+
+string SIDParam::get_value_str() const
+{
+	// returns SID in string format.
+	return sid;
+}
+
+string SIDParam::get_value_hex() const
+{
+	// returns SID in hexadecimal format.
+	return ConvertSID::strToHex(sid);
+}
+
+void SIDParam::set_value(const string &_sid)
+{
+	SIDParam::Type type = wichFormat(_sid);
+	switch (type)
+	{
+		case STRING:
+			sid = _sid;
+			break;
+		case HEX:
+			sid = ConvertSID::hexToStr(_sid);
+			break;
+	}
+}
+
+SIDParam::Type SIDParam::wichFormat(const string &_sid)
+{
+	std::regex sidStrPattern("^[Ss]-1(-\\d+)+$");
+	std::regex sidHexPattern("^01[\\dA-Fa-f]+$");
+	if (regex_match(_sid, sidStrPattern))
+		return STRING;
+	else if (regex_match(_sid, sidHexPattern))
+		return HEX;
+	else
+		throw Exception("SID is invalid", TracePoint("sparam"));
+}
+
+SIDParam::~SIDParam()
+{
+}
+
+};// namespace pparam
