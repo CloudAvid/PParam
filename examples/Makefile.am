@@ -1,4 +1,4 @@
-AM_CPPFLAGS= $(LIBXMLXX_CFLAGS) -I../include
+AM_CPPFLAGS= $(LIBXML2_CFLAGS) -I../include
 
 noinst_PROGRAMS= nic user servers user_list user_xlist xlist_test
 nic_SOURCES= nic.cpp
@@ -8,9 +8,9 @@ user_list_SOURCES= user_list.cpp
 user_xlist_SOURCES= user_xlist.cpp
 xlist_test_SOURCES= xlist_test.cpp
 
-examples_ldadd= $(LIBXMLXX_LIBS) -L$(top_srcdir)/src/.libs -lpparam
-xlist_test_ldadd= $(LIBXMLXX_LIBS) -L$(top_srcdir)/src/.libs -lpparam -lpthread
-examples_ldflags= -Wl,--rpath -Wl,$(top_srcdir)/src/.libs
+examples_ldadd= $(LIBXML2_LIBS) -L$(top_srcdir)/src/.libs -lpparam -lpthread
+xlist_test_ldadd= $(LIBXML2_LIBS) -L$(top_srcdir)/src/.libs -lpparam -lpthread
+examples_ldflags= -Wl,--rpath -Wl,$(top_srcdir)/src/.libs -lpthread
 
 nic_LDADD= $(examples_ldadd)
 nic_LDFLAGS= $(examples_ldflags)

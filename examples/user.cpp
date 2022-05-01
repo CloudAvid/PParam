@@ -87,7 +87,6 @@ public:
 	void set_password(const string _password)
 	{
 		password = _password;
-		password.encrypt_md5();
 	}
 
 private:

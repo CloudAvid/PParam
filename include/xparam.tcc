@@ -5,8 +5,8 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
- * \author hamid jafarian (hamid.jafarian\pdnsoft.com)
+ * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xparam is part of PParam.
  *
@@ -71,14 +71,14 @@ XParam* _XMixParam<List>::value(string name) const
 }
 
 template<typename List>
-XParam& _XMixParam<List>::operator =(const XmlNode* node) throw (Exception)
+XParam& _XMixParam<List>::operator =(const XmlNode* node)
 {
 	if (!is_myNode(node))
 		return *this;
 
 	for (iterator iter = params.begin(); iter != params.end(); ++iter) {
 		XParam *child = *iter;
-		const XParam::XmlNode::NodeList nlist = node->get_children(
+		const XParam::XmlNode::const_NodeList nlist = node->get_children(
 			child->get_pname());
 		int lsize = nlist.size();
 		if (lsize == 1)
@@ -96,7 +96,7 @@ XParam& _XMixParam<List>::operator =(const XmlNode* node) throw (Exception)
 }
 
 template<typename List>
-XParam& _XMixParam<List>::operator =(const XParam& xp) throw (Exception)
+XParam& _XMixParam<List>::operator =(const XParam& xp)
 {
 	const XMixParam* _xmp = dynamic_cast<const XMixParam*>(&xp);
 	XMixParam* xmp = (XMixParam*) (_xmp);
@@ -127,7 +127,7 @@ XParam& _XMixParam<List>::operator =(const XParam& xp) throw (Exception)
 }
 
 template<typename List>
-bool _XMixParam<List>::operator == (const XParam &parameter) throw (Exception)
+bool _XMixParam<List>::operator == (const XParam &parameter)
 {
 	const	XMixParam	*_mixParameter =
 				dynamic_cast<const XMixParam*>(&parameter);
@@ -150,7 +150,7 @@ bool _XMixParam<List>::operator == (const XParam &parameter) throw (Exception)
 }
 
 template<typename List>
-bool _XMixParam<List>::operator != (const XParam &parameter) throw (Exception)
+bool _XMixParam<List>::operator != (const XParam &parameter)
 {
 	return !(*this == parameter);
 }
@@ -183,7 +183,7 @@ string _XMixParam<List>::_xml(bool show_runtime,
 }
 
 template<typename List>
-bool _XMixParam<List>::verify() throw (Exception)
+bool _XMixParam<List>::verify()
 {
 	bool ret = true;
 	for (iterator iter = params.begin(); iter != params.end(); ++iter) {
@@ -193,7 +193,7 @@ bool _XMixParam<List>::verify() throw (Exception)
 }
 
 template<typename List>
-void _XMixParam<List>::dbSave(const XParam* parentNode) throw (Exception)
+void _XMixParam<List>::dbSave(const XParam* parentNode)
 {
 	if (params.size() == 0)
 		return;
@@ -240,7 +240,7 @@ void _XMixParam<List>::dbSave(const XParam* parentNode) throw (Exception)
 }
 
 template<typename List>
-void _XMixParam<List>::dbUpdate(const XParam* parentNode) throw (Exception)
+void _XMixParam<List>::dbUpdate(const XParam* parentNode)
 {
 	if (params.size() == 0)
 		return;
@@ -288,7 +288,7 @@ void _XMixParam<List>::dbUpdate(const XParam* parentNode) throw (Exception)
 }
 
 template<typename List>
-void _XMixParam<List>::dbDelete(const XParam* parentNode) throw (Exception)
+void _XMixParam<List>::dbDelete(const XParam* parentNode)
 {
 	if (parentNode == NULL)
 		dbengine->startTransaction();
@@ -317,7 +317,6 @@ void _XMixParam<List>::dbDelete(const XParam* parentNode) throw (Exception)
 
 template<typename List>
 void _XMixParam<List>::dbCreateStructure(const XParam* parentNode)
-	throw (Exception)
 {
 	if (params.size() == 0)
 		return;
@@ -359,7 +358,6 @@ void _XMixParam<List>::dbCreateStructure(const XParam* parentNode)
 
 template<typename List>
 void _XMixParam<List>::dbDestroyStructure(const XParam* parentNode)
-	throw (Exception)
 {
 	if (parentNode == NULL)
 		dbengine->startTransaction();
@@ -376,7 +374,7 @@ void _XMixParam<List>::dbDestroyStructure(const XParam* parentNode)
 }
 
 template<typename List>
-void _XMixParam<List>::dbLoad(const XParam* parentNode) throw (Exception)
+void _XMixParam<List>::dbLoad(const XParam* parentNode)
 {
 	stringList fields, values;
 	int res;
@@ -394,7 +392,6 @@ void _XMixParam<List>::dbLoad(const XParam* parentNode) throw (Exception)
 
 template<typename List>
 void _XMixParam<List>::dbLoad(stringList &fields, stringList &values)
-	throw (Exception)
 {
 	for (unsigned int i = 0; i < fields.size(); i++) {
 		if (this->value(fields[i]) == NULL)
@@ -451,7 +448,7 @@ string _XMixParam<List>::generateJoinStmts(const XParam* parentNode)
 /* Implementation of "XIntParam" Class.
  */
 template <typename T>
-XParam &XIntParam<T>::operator=(const XParam &xp) throw (Exception)
+XParam &XIntParam<T>::operator=(const XParam &xp)
 {
 	const XIntParam *xip = dynamic_cast<const XIntParam *>(&xp);
 	if (xip == NULL)
@@ -513,7 +510,7 @@ XIntParam<T> XIntParam<T>::operator--(int)
 /* Implementation of "XEnumParam" Class.
  */
 template <typename T>
-XParam &XEnumParam<T>::operator = (const XParam &xp) throw (Exception)
+XParam &XEnumParam<T>::operator = (const XParam &xp)
 {
 	const XEnumParam<T> *xep =
 			dynamic_cast<const XEnumParam<T> *>(&xp);
@@ -538,15 +535,15 @@ XParam &XEnumParam<T>::operator = (const XParam &xp) throw (Exception)
 /* Implementation of "XSetParam" Class.
  */
 template<typename T, typename Key, typename List>
-XParam &XSetParam<T, Key, List>::operator=(const XmlNode *node) throw (Exception)
+XParam &XSetParam<T, Key, List>::operator=(const XmlNode *node)
 {
 	if (!is_myNode(node)) return (*this);
 
-	XmlNode::NodeList nlist = node->get_children();
-	for (XmlNode::NodeList::iterator iter = nlist.begin();
+	XmlNode::const_NodeList nlist = node->get_children();
+	for (XmlNode::const_NodeList::iterator iter = nlist.begin();
 				iter != nlist.end(); ++iter) {
-		const xmlpp::Element *nElem =
-			dynamic_cast<const xmlpp::Element *>(*iter);
+		const xml::Element *nElem =
+			dynamic_cast<const xml::Element *>(*iter);
 		if (nElem) {
 			/** parameter with type of sub-parameters.
 			 */
@@ -569,7 +566,7 @@ XParam &XSetParam<T, Key, List>::operator=(const XmlNode *node) throw (Exception
 }
 
 template<typename T, typename Key, typename List>
-XParam &XSetParam<T, Key, List>::operator=(const XParam &xp) throw (Exception)
+XParam &XSetParam<T, Key, List>::operator=(const XParam &xp)
 {
 	const _XSetParam *_xsp = dynamic_cast<const _XSetParam*>(&xp);
 	_XSetParam *xsp = (_XSetParam *) _xsp;
@@ -609,7 +606,7 @@ XParam &XSetParam<T, Key, List>::operator=(const XParam &xp) throw (Exception)
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbSave(const XParam *parentNode) throw (Exception)
+void XSetParam<T, Key, List>::dbSave(const XParam *parentNode)
 {
 	if (params.size() == 0)
 		return;
@@ -646,7 +643,7 @@ void XSetParam<T, Key, List>::dbSave(const XParam *parentNode) throw (Exception)
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbUpdate(const XParam *parentNode) throw (Exception)
+void XSetParam<T, Key, List>::dbUpdate(const XParam *parentNode)
 {
 	if (params.size() == 0)
 		return;
@@ -687,7 +684,7 @@ void XSetParam<T, Key, List>::dbUpdate(const XParam *parentNode) throw (Exceptio
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbDelete(const XParam *parentNode) throw (Exception)
+void XSetParam<T, Key, List>::dbDelete(const XParam *parentNode)
 {
 	if (parentNode == NULL)
 		dbengine->startTransaction();
@@ -704,8 +701,7 @@ void XSetParam<T, Key, List>::dbDelete(const XParam *parentNode) throw (Exceptio
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbCreateStructure(const XParam *parentNode) 
-							throw (Exception)
+void XSetParam<T, Key, List>::dbCreateStructure(const XParam *parentNode)
 {
 	if (params.size() == 0)
 		return;
@@ -744,8 +740,7 @@ void XSetParam<T, Key, List>::dbCreateStructure(const XParam *parentNode)
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbDestroyStructure(const XParam *parentNode) 
-							throw (Exception)
+void XSetParam<T, Key, List>::dbDestroyStructure(const XParam *parentNode)
 {
 	if (parentNode == NULL)
 		dbengine->startTransaction();
@@ -763,7 +758,7 @@ void XSetParam<T, Key, List>::dbDestroyStructure(const XParam *parentNode)
 }
 
 template<typename T, typename Key, typename List>
-void XSetParam<T, Key, List>::dbLoad(const XParam *parentNode) throw (Exception)
+void XSetParam<T, Key, List>::dbLoad(const XParam *parentNode)
 {
 	XParam *test = newT(NULL);
 	XMixParam *xmix = dynamic_cast<XMixParam *>(test);

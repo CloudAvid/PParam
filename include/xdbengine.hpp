@@ -2,8 +2,8 @@
  * \file xdbengine.hpp
  * defines classes and structures required for storing xparam in database.
  *
- * Copyright 2010 PDNSoft Co. (www.pdnsoft.com)
- * \author ali esmaeilpour (esmaeilpour@pdnsoft.com)
+ * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * \author ali esmaeilpour (esmaeilpour@cloudavid.com)
  *
  * xparam is part of PParam.
  *
@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <pthread.h>
-#include "sqlite3.h"
+#include <sqlite3.h>
 
 #include "exception.hpp"
 
@@ -61,7 +61,7 @@ public:
 
 	virtual void startTransaction() = 0;
 	virtual void commitTransaction() = 0;
-	virtual void rollbackTransaction() throw (Exception) = 0;
+	virtual void rollbackTransaction() = 0;
 
 	virtual void saveXParam(string pname, string pkey, string parentName,
 		string parentKey, stringList fields, stringList values) = 0;
@@ -109,22 +109,20 @@ public:
 	SQLiteDBEngine();
 	virtual ~SQLiteDBEngine();
 
-	virtual void connect(string connectionString) throw (Exception);
+	virtual void connect(string connectionString);
 	virtual void disconnect();
-	virtual void execute(string command) throw (Exception);
+	virtual void execute(string command);
 
 	virtual void startTransaction();
-	virtual void commitTransaction() throw (Exception);
-	virtual void rollbackTransaction() throw (Exception);
+	virtual void commitTransaction();
+	virtual void rollbackTransaction();
 
 	virtual void saveXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values)
-			throw (Exception);
+		string parentKey, stringList fields, stringList values);
 	virtual void saveXParam(string pname, string pkey, stringList fields,
 		stringList values);
 	virtual void updateXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values)
-			throw (Exception);
+		string parentKey, stringList fields, stringList values);
 	virtual void updateXParam(string pname, string pkey, stringList fields,
 		stringList values);
 	virtual void removeXParam(string pname, string pkey, string parentName,
@@ -133,23 +131,19 @@ public:
 	virtual void removeXParamByParent(string pname, string parentName,
 		string parentKey);
 	virtual void createXParamStructure(string pname, string parentName,
-		stringList fields, vector<DBFieldTypes> fieldTypes)
-			throw (Exception);
+		stringList fields, vector<DBFieldTypes> fieldTypes);
 	virtual void createXParamStructure(string pname, stringList fields,
 		vector<DBFieldTypes> fieldTypes);
 	virtual void destroyXParamStructure(string pname);
 
 	virtual int loadXParamRow(string pname, string pkey, string parentName,
-		string parentKey, stringList &fields, stringList &values)
-			throw (Exception);
+		string parentKey, stringList &fields, stringList &values);
 	virtual int loadXParamRow(string pname, string pkey, stringList &fields,
 		stringList &values);
 	virtual int loadXParamValueListByParent(string pname, string parentName,
-		string parentKey, string fieldName, stringList &values)
-			throw (Exception);
+		string parentKey, string fieldName, stringList &values);
 	virtual void getData(string selectstmt,
-		vector<vector<string> > &results, vector<string> &columns)
-			throw (Exception);
+		vector<vector<string> > &results, vector<string> &columns);
 	virtual bool isOnTransaction()
 	{
 		return onTransaction;
