@@ -38,7 +38,7 @@ namespace pparam
 
 /**
  * \class UUIDParam
- * \author Hamid Jafarian(hamid.jafarian@pdnsoft.com)
+ * \author Hamid Jafarian(hamid.jafarian@cloudavid.com)
  * Defines uuid parameter.
  */
 class UUIDParam : public XSingleParam
@@ -73,7 +73,7 @@ private:
 
 /**
  * \class CryptoParam
- * \author Hamed Haji Hussaini
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  * \brief Definea cryptography parameter
  */
 class CryptoParam : public XTextParam
@@ -102,7 +102,7 @@ private:
 
 /**
  * \class BoolEnum
- * \author Hamid Jafarian(hamid.jafarian@pdnsoft.com)
+ * \author Hamid Jafarian(hamid.jafarian@clouavid.com)
  * Defines different values for bool parameter.
  */
 class Bool
@@ -129,7 +129,7 @@ public:
 
 /**
  * \class BoolParam
- * \author Hamid Jafarian(hamid.jafarian@pdnsoft.com)
+ * \author Hamid Jafarian(hamid.jafarian@cloudavid.com)
  * Defines a bool parameter.
  */
 class BoolParam : public XEnumParam<Bool>
@@ -161,7 +161,7 @@ public:
 
 /**
  * \class DateParam
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * Defines Date parameter
  */
@@ -217,7 +217,7 @@ private:
 
 /**
  * \class TimeParam
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * Defines Time parameter
  */
@@ -264,9 +264,9 @@ private:
 
 /**
  * \class DateTime
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
- * ]\brief Defines Date & Time parameter
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
+ * \brief Defines Date & Time parameter
  */
 class DateTime : public XSingleParam
 {
@@ -322,7 +322,7 @@ private:
 /**
  * \class IPType
  * \breif This class enables IPParam to be used in XISetParam
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * This class creates children of IPParam according with IP or type which
  * is set by children
@@ -362,7 +362,7 @@ private:
 /**
  * \class IPParam
  * \brief Peresent an IP address
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  *
  * This class represent IP (Internet Protocol) address.
  * currently, its only a base for IPv4Param and IPv6Param classes.
@@ -568,7 +568,7 @@ protected:
 
 /**
  * \brief Reperesent a IPv4Param address
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  * \class IPv4Param
  *
  * This class reperesent 4th version of IP (Internet Protocol) address.
@@ -778,7 +778,7 @@ private:
 
 /**
  * \brief Reperesent a IPv6Param address
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  * \class IPv6Param
  *
  * This class reperesent 6th version of IP (Internet Protocol) address.
@@ -957,7 +957,7 @@ public:
 /**
  * \class IPxParam
  * \brief One class for both IPv4 and IPv6
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * This class defines a structure to include both IPv4 and IPv6 classes
  */
@@ -1100,7 +1100,7 @@ protected:
 /**
  * \class IPList
  * \brief Includes list of IPs
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * Includes list of IPs and gets an IP address to check whether it is available
  * or not
@@ -1170,6 +1170,7 @@ private:
 
 /**
  * \class IPxList
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  * Defines list of "IPxParam" objects.
  */
 class IPxList : public XSetParam<IPxParam, string>
@@ -1238,7 +1239,7 @@ private:
 /**
  * \class PortParam
  * \breif Defines Port and Port Range
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * This class includes single port and port range at following formats:
  * [!][[N]:]N OR [!]N[:[N]]
@@ -1318,7 +1319,7 @@ private:
 /**
  * \class PortList
  * \brief List of Ports
- * \author Hamed Haji Hussaini(hajihussaini@pdnsoft.com)
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  *
  * This class includes list of ports
  */
@@ -1390,6 +1391,7 @@ private:
 
 /**
  * \class MACAddressParam
+ * \author Hamed Haji Hussaini(hajihussaini@cloudavid.com)
  * Defines a MAC address parameter.
  */
 class MACAddressParam : public XTextParam
@@ -1431,7 +1433,7 @@ public:
 
 /**
  * \brief 
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  * \class DBEngineType
  *
  *
@@ -1466,7 +1468,7 @@ protected:
 
 /**
  * \brief 
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  * \class DBEngineParam
  *
  *
@@ -1580,7 +1582,7 @@ protected:
 
 /**
  * \brief 
- * \author Ali Esmaeilpour(esmaeilpur@pdnsoft.com)
+ * \author Ali Esmaeilpour(esmaeilpur@cloudavid.com)
  * \class SQLiteDBEngineParam
  *
  *
@@ -1632,7 +1634,7 @@ protected:
 
 /**
  * \class EmailParam
- * \author Seyed Alireza Kahduyi(alireza.kahduyi@pdnsoft.com)
+ * \author Seyed Alireza Kahduyi(alireza.kahduyi@cloudavid.com)
  * Defines Email Data Type.
  */
 class EmailParam: public XTextParam
