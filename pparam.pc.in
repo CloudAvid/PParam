@@ -5,7 +5,7 @@ includedir=@includedir@
 
 Name: @PACKAGE_NAME@
 Description: Common parameter structures for managing/manipulating XMLs
-URL: http://www.pdnsoft.com
+URL: http://www.cloudavid.com
 Requires: libxml-2.0 uuid openssl
 Version: @PACKAGE_VERSION@
 Libs: -lpparam
