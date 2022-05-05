@@ -20,9 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _PDN_XDBENGINE_HPP_
-#define _PDN_XDBENGINE_HPP_
+#pragma once
 
 #include <iostream>
 #include <pthread.h>
@@ -277,4 +275,3 @@ protected:
 };
 } //namespace pparam
 
-#endif //_PDN_XDBENGINE_HPP_
