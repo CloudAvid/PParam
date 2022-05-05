@@ -144,5 +144,3 @@ private:
 };
 
 } // namespace pparam
-
-#endif // _PDN_LOGSYSTEM_HPP_
