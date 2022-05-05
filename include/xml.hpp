@@ -5,7 +5,7 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author Mehrdad Dashtbani (dashtbani@cloudavid.com)
  *
  * xml is part of PParam.

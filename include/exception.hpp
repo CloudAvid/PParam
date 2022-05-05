@@ -1,7 +1,7 @@
 /**
  * @file exception.hpp
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * @author hamid jafaian (hamid.jafarian@cloudavid.com)
  * @author Hamed Haji Hussuaini (hajihussaini@cloudavid.com)
  *

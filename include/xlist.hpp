@@ -9,7 +9,7 @@
  * node.
  * Read accesses in this list simulates by iterators on nodes.
  *
- * Copyright 2013,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2013-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xlist is part of PParam.
