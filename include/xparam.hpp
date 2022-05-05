@@ -5,7 +5,7 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author hamid jafarian (hamid.jafarian@cloudavid.com)
  *
  * xparam is part of PParam.

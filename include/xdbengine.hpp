@@ -2,7 +2,7 @@
  * \file xdbengine.hpp
  * defines classes and structures required for storing xparam in database.
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author ali esmaeilpour (esmaeilpour@cloudavid.com)
  *
  * xparam is part of PParam.
