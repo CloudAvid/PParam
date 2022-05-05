@@ -20,8 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _PDN_SPARAM_HPP_
-#define _PDN_SPARAM_HPP_
+#pragma once
 
 #include <openssl/md5.h>
 
@@ -1749,4 +1748,3 @@ private:
 };
 
 };// end of namespace pparam
-#endif //_PDN_SPARAM_HPP_
