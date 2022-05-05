@@ -24,8 +24,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#ifndef _PDN_XLIST_HPP_
-#define _PDN_XLIST_HPP_
+#pragma once
 
 #define GCC_VERSION (__GNUC__ * 10000 \
 				+ __GNUC_MINOR__ * 100 \
@@ -1084,6 +1083,3 @@ public:
 };
 
 } // namespace pparam
-
-#endif // _PDN_XLIST_HPP_
-
