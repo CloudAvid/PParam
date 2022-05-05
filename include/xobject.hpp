@@ -21,8 +21,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#ifndef _PDN_XOBJECT_HPP_
-#define _PDN_XOBJECT_HPP_
+#pragma once
 
 #include "xparam.hpp"
 #include "sparam.hpp"
@@ -2999,5 +2998,3 @@ protected:
 };
 
 } // namespace pparam
-
-#endif // _PDN_XOBJECT_HPP_
