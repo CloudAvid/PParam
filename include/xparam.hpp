@@ -23,9 +23,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _PDN_XPARAM_HPP_
-#define _PDN_XPARAM_HPP_
+#pragma once
 
 #include <iostream>
 #include "xml.hpp"
@@ -1514,5 +1512,3 @@ private:
 } // namespace pparam
 
 #include "xparam.tcc"
-
-#endif //_PDN_XPARAM_HPP_
