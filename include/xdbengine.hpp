@@ -234,4 +234,3 @@ protected:
     std::stringstream _conditions;
 };
 } // namespace pparam
-
