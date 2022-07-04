@@ -22,15 +22,13 @@ Although please review [issues](https://github.com/CloudAvid/PParam/issues) for 
 
 ## Bug report
 
-To report a malfunction in this project; first please check if ,it hasn't been reported before in [issues](https://github.com/CloudAvid/PParam/issues).
+To report a malfunction in this project; first please check if it hasn't been reported yet in [issues](https://github.com/CloudAvid/PParam/issues).
 
-Then create an associated [issue](https://github.com/CloudAvid/PParam/issues) for your report.
+If has not then create an associated [issue](https://github.com/CloudAvid/PParam/issues) for your report.
 
 Your report must include these properties:
 
 - **Comprehensible** and **Full** documentation which consisted of:
-  - How to reproduce the malfunction in consecutive steps?
+  - How to reproduce the malfunction in consecutive steps.
   - What configuration flags or modification used?
 - (Preferably) Set of test suites which causes malfunction.
-
-And at the end we appreciate your contribution :smile:
