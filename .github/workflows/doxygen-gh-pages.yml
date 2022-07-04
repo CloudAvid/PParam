@@ -3,8 +3,7 @@ name: Doxygen GitHub Pages Deploy Action
 on:
   push:
     branches:
-      - next
-      - doc-improv-19
+      - master
 
 jobs:
   deploy:
@@ -13,3 +12,6 @@ jobs:
       - uses: DenverCoder1/doxygen-github-pages-action@v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: docs/html
+          config_file: Doxyfile
