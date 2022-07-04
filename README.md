@@ -4,7 +4,7 @@
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Documentation](#documentation)
-  - [Contribution](#contribution)
+  - [Contribution and Bug reports](#contribution-and-bug-reports)
   - [About](#about)
 
 ## Introduction
@@ -63,16 +63,9 @@ pkg-config libpparam-1.0 --cflags –libs
 
 Read the project [wiki](https://github.com/CloudAvid/PParam/wiki).
 
-## Contribution
+## Contribution and Bug reports
 
-If you are capable of contributing code changes, we encourage you to do so. You can help us in different fields:
-
-- Bug reports
-- Improving documentation
-- Providing test suit
-- ...
-
-For better set of needed contribution please check [issues](https://github.com/CloudAvid/PParam/issues) or even report new ones :smile.
+Please check [contribution](CONTRIBUTING.md) standard for full explanation.
 
 ## About
 
