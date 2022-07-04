@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - next
+      - doc-improv-19
 
 jobs:
   deploy:
