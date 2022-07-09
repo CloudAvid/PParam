@@ -1,0 +1,28 @@
+digraph "pparam::XObject"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="pparam::XObject",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" xoKey" ,fontname="Helvetica"];
+  Node2 [label="pparam::UUIDParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1UUIDParam.html",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="pparam::XSingleParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XSingleParam.html",tooltip=" "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="pparam::XParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XParam.html",tooltip=" "];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pname\nversion" ,fontname="Helvetica"];
+  Node5 [label="string",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node6 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" xoName" ,fontname="Helvetica"];
+  Node6 [label="pparam::XTextParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XTextParam.html",tooltip=" "];
+  Node3 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" val" ,fontname="Helvetica"];
+  Node7 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cListVersion" ,fontname="Helvetica"];
+  Node7 [label="pparam::XIntParam\<\l XUInt \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XIntParam.html",tooltip=" "];
+  Node3 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" cList" ,fontname="Helvetica"];
+  Node8 [label="pparam::XList\< _XObjectConnection \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XList.html",tooltip=" "];
+  Node9 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" xoStatus\nxoStatus_prev" ,fontname="Helvetica"];
+  Node9 [label="pparam::XEnumParam\l\< pparam::XObjectStatus \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XEnumParam.html",tooltip=" "];
+  Node3 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

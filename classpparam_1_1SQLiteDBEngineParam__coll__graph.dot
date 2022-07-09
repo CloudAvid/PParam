@@ -1,0 +1,34 @@
+digraph "pparam::SQLiteDBEngineParam"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="pparam::SQLiteDBEngineParam",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="pparam::DBEngineParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1DBEngineParam.html",tooltip=" "];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="XMixParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1__XMixParam.html",tooltip=" "];
+  Node4 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="pparam::XParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XParam.html",tooltip=" "];
+  Node5 -> Node4 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" pname\nversion" ,fontname="Helvetica"];
+  Node5 [label="string",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node6 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" dbengine" ,fontname="Helvetica"];
+  Node6 [label="pparam::XDBEngine",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XDBEngine.html",tooltip=" "];
+  Node6 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" dbe" ,fontname="Helvetica"];
+  Node7 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" connectionstring" ,fontname="Helvetica"];
+  Node7 [label="pparam::XTextParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XTextParam.html",tooltip=" "];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="pparam::XSingleParam",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XSingleParam.html",tooltip=" "];
+  Node4 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node7 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" val" ,fontname="Helvetica"];
+  Node9 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" dbetype" ,fontname="Helvetica"];
+  Node9 [label="pparam::DBEngineType",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1DBEngineType.html",tooltip=" "];
+  Node3 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 -> Node9 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" type" ,fontname="Helvetica"];
+  Node10 [label="pparam::XEnumParam\l\< pparam::DBEngineTypes \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1XEnumParam.html",tooltip=" "];
+  Node8 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" sqlitedb" ,fontname="Helvetica"];
+  Node11 [label="pparam::SQLiteDBEngine",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classpparam_1_1SQLiteDBEngine.html",tooltip=" "];
+  Node6 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}
