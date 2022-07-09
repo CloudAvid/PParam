@@ -2,7 +2,7 @@
  * \file xdbengine.hpp
  * defines classes and structures required for storing xparam in database.
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author ali esmaeilpour (esmaeilpour@cloudavid.com)
  *
  * xparam is part of PParam.
@@ -20,9 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PParam.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef _PDN_XDBENGINE_HPP_
-#define _PDN_XDBENGINE_HPP_
+#pragma once
 
 #include <iostream>
 #include <pthread.h>
@@ -30,9 +28,9 @@
 
 #include "exception.hpp"
 
+#include <sstream>
 #include <stdio.h>
 #include <string>
-#include <sstream>
 using std::string;
 
 #include <vector>
@@ -43,10 +41,7 @@ namespace pparam
 
 typedef vector<string> stringList;
 
-enum DBFieldTypes
-{
-	DBINTEGER, DBFLOAT, DBTEXT, DBDATETIME, DBBOOLEAN
-};
+enum DBFieldTypes { DBINTEGER, DBFLOAT, DBTEXT, DBDATETIME, DBBOOLEAN };
 
 /**
  * \class XDBEngine
@@ -55,226 +50,187 @@ enum DBFieldTypes
 class XDBEngine
 {
 public:
-	virtual void connect(string connectionString) = 0;
-	virtual void disconnect() = 0;
-	virtual void execute(string command) = 0;
+    virtual void connect(string connectionString) = 0;
+    virtual void disconnect() = 0;
+    virtual void execute(string command) = 0;
 
-	virtual void startTransaction() = 0;
-	virtual void commitTransaction() = 0;
-	virtual void rollbackTransaction() = 0;
+    virtual void startTransaction() = 0;
+    virtual void commitTransaction() = 0;
+    virtual void rollbackTransaction() = 0;
 
-	virtual void saveXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values) = 0;
-	virtual void saveXParam(string pname, string pkey, stringList fields,
-		stringList values) = 0;
-	virtual void updateXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values) = 0;
-	virtual void updateXParam(string pname, string pkey, stringList fields,
-		stringList values) = 0;
-	virtual void removeXParam(string pname, string pkey, string parentName,
-		string parentKey) = 0;
-	virtual void removeXParam(string pname, string pkey) = 0;
-	virtual void removeXParamByParent(string pname, string parentName,
-		string parentKey) = 0;
-	virtual void createXParamStructure(string pname, string parentName,
-		stringList fields, vector<DBFieldTypes> fieldTypes) = 0;
-	virtual void createXParamStructure(string pname, stringList fields,
-		vector<DBFieldTypes> fieldTypes) = 0;
-	virtual void destroyXParamStructure(string pname) = 0;
+    virtual void saveXParam(string pname, string pkey, string parentName, string parentKey,
+                            stringList fields, stringList values) = 0;
+    virtual void saveXParam(string pname, string pkey, stringList fields, stringList values) = 0;
+    virtual void updateXParam(string pname, string pkey, string parentName, string parentKey,
+                              stringList fields, stringList values) = 0;
+    virtual void updateXParam(string pname, string pkey, stringList fields, stringList values) = 0;
+    virtual void removeXParam(string pname, string pkey, string parentName, string parentKey) = 0;
+    virtual void removeXParam(string pname, string pkey) = 0;
+    virtual void removeXParamByParent(string pname, string parentName, string parentKey) = 0;
+    virtual void createXParamStructure(string pname, string parentName, stringList fields,
+                                       vector<DBFieldTypes> fieldTypes) = 0;
+    virtual void createXParamStructure(string pname, stringList fields,
+                                       vector<DBFieldTypes> fieldTypes) = 0;
+    virtual void destroyXParamStructure(string pname) = 0;
 
-	virtual int loadXParamRow(string pname, string pkey, string parentName,
-		string parentKey, stringList &fields, stringList &values) = 0;
-	virtual int loadXParamRow(string pname, string pkey, stringList &fields,
-		stringList &values) = 0;
-	virtual int loadXParamValueListByParent(string pname, string parentName,
-		string parentKey, string fieldName, stringList &values) = 0;
-	virtual int loadXParamKeyListByParent(string pname, string parentName,
-		string parentKey, stringList &values)
-	{
-		return loadXParamValueListByParent(pname, parentName, parentKey,
-			pname + "_key", values);
-	}
-	virtual void getData(string selectstmt,
-		vector<vector<string> > &results, vector<string> &columns) = 0;
-	virtual bool backup(string dest) = 0;
-	virtual void cleanup() = 0;
-	virtual bool isOnTransaction() = 0;
-	virtual string DBTypetoString(DBFieldTypes t) = 0;
-	virtual bool isConnected() = 0;
+    virtual int loadXParamRow(string pname, string pkey, string parentName, string parentKey,
+                              stringList &fields, stringList &values) = 0;
+    virtual int loadXParamRow(string pname, string pkey, stringList &fields,
+                              stringList &values) = 0;
+    virtual int loadXParamValueListByParent(string pname, string parentName, string parentKey,
+                                            string fieldName, stringList &values) = 0;
+    virtual int loadXParamKeyListByParent(string pname, string parentName, string parentKey,
+                                          stringList &values)
+    {
+        return loadXParamValueListByParent(pname, parentName, parentKey, pname + "_key", values);
+    }
+    virtual void getData(string selectstmt, vector<vector<string> > &results,
+                         vector<string> &columns) = 0;
+    virtual bool backup(string dest) = 0;
+    virtual void cleanup() = 0;
+    virtual bool isOnTransaction() = 0;
+    virtual string DBTypetoString(DBFieldTypes t) = 0;
+    virtual bool isConnected() = 0;
 };
 
-class SQLiteDBEngine: public XDBEngine
+class SQLiteDBEngine : public XDBEngine
 {
 public:
-	SQLiteDBEngine();
-	virtual ~SQLiteDBEngine();
+    SQLiteDBEngine();
+    virtual ~SQLiteDBEngine();
 
-	virtual void connect(string connectionString);
-	virtual void disconnect();
-	virtual void execute(string command);
+    virtual void connect(string connectionString);
+    virtual void disconnect();
+    virtual void execute(string command);
 
-	virtual void startTransaction();
-	virtual void commitTransaction();
-	virtual void rollbackTransaction();
+    virtual void startTransaction();
+    virtual void commitTransaction();
+    virtual void rollbackTransaction();
 
-	virtual void saveXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values);
-	virtual void saveXParam(string pname, string pkey, stringList fields,
-		stringList values);
-	virtual void updateXParam(string pname, string pkey, string parentName,
-		string parentKey, stringList fields, stringList values);
-	virtual void updateXParam(string pname, string pkey, stringList fields,
-		stringList values);
-	virtual void removeXParam(string pname, string pkey, string parentName,
-		string parentKey);
-	virtual void removeXParam(string pname, string pkey);
-	virtual void removeXParamByParent(string pname, string parentName,
-		string parentKey);
-	virtual void createXParamStructure(string pname, string parentName,
-		stringList fields, vector<DBFieldTypes> fieldTypes);
-	virtual void createXParamStructure(string pname, stringList fields,
-		vector<DBFieldTypes> fieldTypes);
-	virtual void destroyXParamStructure(string pname);
+    virtual void saveXParam(string pname, string pkey, string parentName, string parentKey,
+                            stringList fields, stringList values);
+    virtual void saveXParam(string pname, string pkey, stringList fields, stringList values);
+    virtual void updateXParam(string pname, string pkey, string parentName, string parentKey,
+                              stringList fields, stringList values);
+    virtual void updateXParam(string pname, string pkey, stringList fields, stringList values);
+    virtual void removeXParam(string pname, string pkey, string parentName, string parentKey);
+    virtual void removeXParam(string pname, string pkey);
+    virtual void removeXParamByParent(string pname, string parentName, string parentKey);
+    virtual void createXParamStructure(string pname, string parentName, stringList fields,
+                                       vector<DBFieldTypes> fieldTypes);
+    virtual void createXParamStructure(string pname, stringList fields,
+                                       vector<DBFieldTypes> fieldTypes);
+    virtual void destroyXParamStructure(string pname);
 
-	virtual int loadXParamRow(string pname, string pkey, string parentName,
-		string parentKey, stringList &fields, stringList &values);
-	virtual int loadXParamRow(string pname, string pkey, stringList &fields,
-		stringList &values);
-	virtual int loadXParamValueListByParent(string pname, string parentName,
-		string parentKey, string fieldName, stringList &values);
-	virtual void getData(string selectstmt,
-		vector<vector<string> > &results, vector<string> &columns);
-	virtual bool isOnTransaction()
-	{
-		return onTransaction;
-	}
-	virtual bool isConnected()
-	{
-		return isconnected;
-	}
-	virtual bool backup(string dest);
-	virtual void cleanup();
-	virtual string DBTypetoString(DBFieldTypes t);
+    virtual int loadXParamRow(string pname, string pkey, string parentName, string parentKey,
+                              stringList &fields, stringList &values);
+    virtual int loadXParamRow(string pname, string pkey, stringList &fields, stringList &values);
+    virtual int loadXParamValueListByParent(string pname, string parentName, string parentKey,
+                                            string fieldName, stringList &values);
+    virtual void getData(string selectstmt, vector<vector<string> > &results,
+                         vector<string> &columns);
+    virtual bool isOnTransaction() { return onTransaction; }
+    virtual bool isConnected() { return isconnected; }
+    virtual bool backup(string dest);
+    virtual void cleanup();
+    virtual string DBTypetoString(DBFieldTypes t);
+
 protected:
-	sqlite3 *dbp;
-	pthread_key_t transactionBufferTSMKey;
-	bool onTransaction, isconnected;
+    sqlite3 *dbp;
+    pthread_key_t transactionBufferTSMKey;
+    bool onTransaction, isconnected;
 };
 
 class XDBCondition
 {
 public:
-	XDBCondition()
-	{
-		this->clearConditions();
-	}
-	virtual void addConditionEqual(string field, string value,
-		bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(field + "='" + value + "'");
-		else
-			addCondition(field + "<>'" + value + "'");
-	}
-	virtual void addConditionGreaterThan(string field, string value,
-		bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(field + ">'" + value + "'");
-		else
-			addCondition(field + "<='" + value + "'");
-	}
-	virtual void addConditionLessThan(string field, string value,
-		bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(field + "<'" + value + "'");
-		else
-			addCondition(field + ">='" + value + "'");
-	}
-	virtual void addConditionGreaterThanOrEqual(string field, string value,
-		bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(field + ">='" + value + "'");
-		else
-			addCondition(field + "<'" + value + "'");
-	}
-	virtual void addConditionLessThanOrEqual(string field, string value,
-		bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(field + "<='" + value + "'");
-		else
-			addCondition(field + ">'" + value + "'");
-	}
-	virtual void addConditionLike(string field, string value, bool inverse =
-		false)
-	{
-		if (!inverse)
-			addCondition(field + " LIKE '" + value + "'");
-		else
-			addCondition(field + " NOT LIKE '" + value + "'");
-	}
-	virtual void addConditionBetween(string field, string startv,
-		string endv, bool inverse = false)
-	{
-		if (!inverse)
-			addCondition(
-				field + " BETWEEN '" + startv + "' AND '" + endv
-					+ "'");
-		else
-			addCondition(
-				field + " NOT BETWEEN '" + startv + "' AND '"
-					+ endv + "'");
-	}
-	virtual void addConditionIn(string field, vector<string> values,
-		int num, bool inverse = false)
-	{
-		std::stringstream buff;
-		for (unsigned int i = 0; i < values.size(); i++)
-			buff << values[i];
-		this->addConditionIn(field, buff.str(), inverse);
-	}
-	virtual void addConditionIn(string field, string *values, int num,
-		bool inverse = false)
-	{
-		std::stringstream buff;
-		for (int i = 0; i < num; i++)
-			buff << values[i];
-		this->addConditionIn(field, buff.str(), inverse);
-	}
-	virtual void addConditionIn(string field, string values, bool inverse =
-		false)
-	{
-		if (!inverse)
-			addCondition(field + " IN (" + values + ")");
-		else
-			addCondition(field + " NOT IN (" + values + ")");
-	}
-	virtual void addCondition(string condition)
-	{
-		if (_conditions.tellp())
-			_conditions << " AND " << condition;
-		else
-			_conditions << condition;
-	}
-	virtual void setConditions(string conditions)
-	{
-		_conditions.clear();
-		_conditions << conditions;
-	}
-	virtual string getConditions()
-	{
-		return _conditions.str();
-	}
-	virtual void clearConditions()
-	{
-		_conditions.clear();
-	}
-protected:
-	std::stringstream _conditions;
-};
-} //namespace pparam
+    XDBCondition() { this->clearConditions(); }
+    virtual void addConditionEqual(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + "='" + value + "'");
+        else
+            addCondition(field + "<>'" + value + "'");
+    }
+    virtual void addConditionGreaterThan(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + ">'" + value + "'");
+        else
+            addCondition(field + "<='" + value + "'");
+    }
+    virtual void addConditionLessThan(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + "<'" + value + "'");
+        else
+            addCondition(field + ">='" + value + "'");
+    }
+    virtual void addConditionGreaterThanOrEqual(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + ">='" + value + "'");
+        else
+            addCondition(field + "<'" + value + "'");
+    }
+    virtual void addConditionLessThanOrEqual(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + "<='" + value + "'");
+        else
+            addCondition(field + ">'" + value + "'");
+    }
+    virtual void addConditionLike(string field, string value, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + " LIKE '" + value + "'");
+        else
+            addCondition(field + " NOT LIKE '" + value + "'");
+    }
+    virtual void addConditionBetween(string field, string startv, string endv, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + " BETWEEN '" + startv + "' AND '" + endv + "'");
+        else
+            addCondition(field + " NOT BETWEEN '" + startv + "' AND '" + endv + "'");
+    }
+    virtual void addConditionIn(string field, vector<string> values, int num, bool inverse = false)
+    {
+        std::stringstream buff;
+        for (unsigned int i = 0; i < values.size(); i++)
+            buff << values[i];
+        this->addConditionIn(field, buff.str(), inverse);
+    }
+    virtual void addConditionIn(string field, string *values, int num, bool inverse = false)
+    {
+        std::stringstream buff;
+        for (int i = 0; i < num; i++)
+            buff << values[i];
+        this->addConditionIn(field, buff.str(), inverse);
+    }
+    virtual void addConditionIn(string field, string values, bool inverse = false)
+    {
+        if (!inverse)
+            addCondition(field + " IN (" + values + ")");
+        else
+            addCondition(field + " NOT IN (" + values + ")");
+    }
+    virtual void addCondition(string condition)
+    {
+        if (_conditions.tellp())
+            _conditions << " AND " << condition;
+        else
+            _conditions << condition;
+    }
+    virtual void setConditions(string conditions)
+    {
+        _conditions.clear();
+        _conditions << conditions;
+    }
+    virtual string getConditions() { return _conditions.str(); }
+    virtual void clearConditions() { _conditions.clear(); }
 
-#endif //_PDN_XDBENGINE_HPP_
+protected:
+    std::stringstream _conditions;
+};
+} // namespace pparam

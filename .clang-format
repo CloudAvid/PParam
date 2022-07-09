@@ -1,0 +1,14 @@
+﻿---
+BasedOnStyle: LLVM
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: Align
+AllowAllConstructorInitializersOnNextLine: 'false'
+BreakBeforeBraces: Linux
+BreakConstructorInitializers: AfterColon
+ColumnLimit: '100'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'false'
+Standard: Auto
+IndentWidth: '4'
+UseTab: Never
+
+...

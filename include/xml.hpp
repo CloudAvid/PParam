@@ -5,7 +5,7 @@
  * Our focus is on parameters of virtual machines to read, write, process,...
  * them from config repository.
  *
- * Copyright 2010,2022 Cloud Avid Co. (www.cloudavid.com)
+ * Copyright 2010-2022 Cloud Avid Co. (www.cloudavid.com)
  * \author Mehrdad Dashtbani (dashtbani@cloudavid.com)
  *
  * xml is part of PParam.
@@ -40,40 +40,38 @@ namespace xml
 class Node
 {
 public:
-	typedef std::vector<Node*> NodeList;
-	typedef std::vector<const Node*> const_NodeList;
+    typedef std::vector<Node *> NodeList;
+    typedef std::vector<const Node *> const_NodeList;
 
-	Node(xmlNode *_node);
-	xmlNode* get_node() const;
-	/**
-	 * @return node name.
-	 */
-	std::string get_name() const;
-	/**
-	 * @return children of node.
-	 */
-	NodeList get_children(const std::string &name =
-						std::string());
-	const_NodeList get_children(const std::string &name =
-						std::string()) const;
-	/**
-	 * for every xmlNode* we create a Node and
-	 * assign to _private of xmlNode*,
-	 * this function realize type of xmlNode* and
-	 * create specific Node for it.
-	 */
-	static void create_wrapper(xmlNode* _node);
-	/**
-	 * this function release all Node (as recursively).
-	 */
-	static void free_wrappers(xmlNode* _node);
-	virtual ~Node();
+    Node(xmlNode *_node);
+    xmlNode *get_node() const;
+    /**
+     * @return node name.
+     */
+    std::string get_name() const;
+    /**
+     * @return children of node.
+     */
+    NodeList get_children(const std::string &name = std::string());
+    const_NodeList get_children(const std::string &name = std::string()) const;
+    /**
+     * for every xmlNode* we create a Node and
+     * assign to _private of xmlNode*,
+     * this function realize type of xmlNode* and
+     * create specific Node for it.
+     */
+    static void create_wrapper(xmlNode *_node);
+    /**
+     * this function release all Node (as recursively).
+     */
+    static void free_wrappers(xmlNode *_node);
+    virtual ~Node();
 
 private:
-	/**
-	 * in fact this attribute play role of xml tag.
-	 */
-	xmlNode			*node;
+    /**
+     * in fact this attribute play role of xml tag.
+     */
+    xmlNode *node;
 };
 
 /**
@@ -82,13 +80,14 @@ private:
 class Element : public Node
 {
 public:
-	Element(xmlNode* node);
-	/**
-	 * this function search on attribute of element and.
-	 * @return attribute value that attribute key is equals with input key.
-	 */
-	std::string get_attribute(const std::string &key) const;
-	~Element() override;
+    Element(xmlNode *node);
+    /**
+     * this function search on attribute of element and.
+     * @return attribute value that attribute key is equals with input key.
+     */
+    std::string get_attribute(const std::string &key) const;
+    ~Element() override;
+
 private:
 };
 
@@ -98,13 +97,13 @@ private:
 class ContentNode : public Node
 {
 public:
-	ContentNode(xmlNode* node);
-	/**
-	 * @return content of node,
-	 * actually return this content inside tag (<>content</>).
-	 */
-	std::string get_content() const;
-	~ContentNode() override;
+    ContentNode(xmlNode *node);
+    /**
+     * @return content of node,
+     * actually return this content inside tag (<>content</>).
+     */
+    std::string get_content() const;
+    ~ContentNode() override;
 };
 
 /**
@@ -113,8 +112,8 @@ public:
 class CommentNode : public ContentNode
 {
 public:
-	CommentNode(xmlNode* node);
-	~CommentNode() override;
+    CommentNode(xmlNode *node);
+    ~CommentNode() override;
 };
 
 /**
@@ -123,8 +122,8 @@ public:
 class CDataNode : public ContentNode
 {
 public:
-	CDataNode(xmlNode* node);
-	~CDataNode() override;
+    CDataNode(xmlNode *node);
+    ~CDataNode() override;
 };
 
 /**
@@ -133,8 +132,8 @@ public:
 class TextNode : public ContentNode
 {
 public:
-	TextNode(xmlNode* node);
-	~TextNode() override;
+    TextNode(xmlNode *node);
+    ~TextNode() override;
 };
 
 /**
@@ -144,38 +143,38 @@ public:
 class Document
 {
 public:
-	Document();
-	~Document();
-	/**
-	 * @return root node of document.
-	 */
-	Element* get_root_node();
-	/**
-	 * parse xml string and initialize document.
-	 */
-	void parseXmlStr(const std::string &xmlStr);
-	/**
-	 * parse xml file and initialize document.
-	 */
-	void parseXmlFile(const std::string &filePath);
-	/**
-	 * Return xml as string.
-	 */
-	std::string toString() const;
-	/**
-	 * Execute query on document and return result.
-	 *
-	 * @note throws exception if any error occured.
-	 */
-	std::string queryXml(const std::string &query,
-		const std::string &partialTag = "");
+    Document();
+    ~Document();
+    /**
+     * @return root node of document.
+     */
+    Element *get_root_node();
+    /**
+     * parse xml string and initialize document.
+     */
+    void parseXmlStr(const std::string &xmlStr);
+    /**
+     * parse xml file and initialize document.
+     */
+    void parseXmlFile(const std::string &filePath);
+    /**
+     * Return xml as string.
+     */
+    std::string toString() const;
+    /**
+     * Execute query on document and return result.
+     *
+     * @note throws exception if any error occured.
+     */
+    std::string queryXml(const std::string &query, const std::string &partialTag = "");
 
-	xmlDoc* get_document() const;
+    xmlDoc *get_document() const;
+
 private:
-	/**
-	 * this attribute play role of xml document.
-	 */
-	xmlDoc		*document;
+    /**
+     * this attribute play role of xml document.
+     */
+    xmlDoc *document;
 };
 
 /**
@@ -184,35 +183,38 @@ private:
  */
 class Parser
 {
-	class Init {
-  		public:
-   			 Init();
-    			~Init();
-  	};
+    class Init
+    {
+    public:
+        Init();
+        ~Init();
+    };
+
 public:
-	Parser();
-	Document* get_document();
-	/**
-	 * call xml string parser of document and initialize it.
-	 */
-	void parse_memory(const std::string &xmlStr);
-	/**
-	 * call xml file parser of documnet and initialize it.
-	 */
-	void parse_file(const std::string &filePath);
-	explicit operator bool() const;
-	~Parser();
+    Parser();
+    Document *get_document();
+    /**
+     * call xml string parser of document and initialize it.
+     */
+    void parse_memory(const std::string &xmlStr);
+    /**
+     * call xml file parser of documnet and initialize it.
+     */
+    void parse_file(const std::string &filePath);
+    explicit operator bool() const;
+    ~Parser();
+
 private:
-	/**
-	 * every parser need document for parse,
-	 * actually this document parsed whit parser.
-	 */
-	Document	*document;
-	/**
-	 * an static instance for inner Init class.
-	 */
-	static Init 	init_;
+    /**
+     * every parser need document for parse,
+     * actually this document parsed whit parser.
+     */
+    Document *document;
+    /**
+     * an static instance for inner Init class.
+     */
+    static Init init_;
 };
 
-}// namespace xml
-}// namespace pparam
+} // namespace xml
+} // namespace pparam
